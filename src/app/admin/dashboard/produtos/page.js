@@ -232,6 +232,7 @@ export default function AdminProdutos() {
                 <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border-2 border-dark-100 bg-dark-950">
                   <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
                   <button
+                    type="button"
                     onClick={() => removeImage(i)}
                     className="absolute top-1 right-1 w-6 h-6 bg-red-500/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
@@ -245,6 +246,7 @@ export default function AdminProdutos() {
 
               {allImages.length < 9 && (
                 <button
+                  type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
                   className="aspect-square rounded-xl border-2 border-dashed border-dark-200 hover:border-green-neon/50 bg-dark-50/50 hover:bg-dark-50 flex flex-col items-center justify-center gap-1 transition-colors disabled:opacity-50"
@@ -280,6 +282,7 @@ export default function AdminProdutos() {
                 className="input-cartoon flex-1 text-sm"
               />
               <button
+                type="button"
                 onClick={addUrlImage}
                 disabled={!urlInput.trim() || allImages.length >= 9}
                 className="btn-cartoon bg-green-neon/20 text-green-neon border border-green-neon/30 hover:bg-green-neon/30 px-3 rounded-lg disabled:opacity-30 text-sm"
