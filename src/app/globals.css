@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply antialiased;
+  }
+  
+  input, select, textarea, button {
+    font-size: 16px !important;
+  }
+}
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply bg-dark-900 text-white font-body;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(0, 255, 0, 0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 50%, rgba(0, 255, 0, 0.03) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: rgba(0, 255, 0, 0.3);
+    color: #fff;
+  }
+}
+
+@layer components {
+  .card-cartoon {
+    @apply relative bg-dark-50 border-2 border-dark-100 rounded-xl p-4 transition-all duration-300;
+    box-shadow:
+      3px 3px 0px rgba(0, 255, 0, 0.15),
+      inset 0 0 0 rgba(0, 255, 0, 0);
+  }
+
+  .card-cartoon:hover {
+    @apply border-green-neon/30 -translate-y-0.5;
+    box-shadow:
+      4px 4px 0px rgba(0, 255, 0, 0.25),
+      0 0 20px rgba(0, 255, 0, 0.1);
+  }
+
+  .btn-cartoon {
+    @apply relative inline-flex items-center justify-center px-5 py-2 font-cartoon text-sm
+      bg-green-neon text-dark-950 rounded-lg transition-all duration-300 overflow-hidden;
+    box-shadow: 0 3px 10px rgba(0, 255, 0, 0.3);
+  }
+
+  .btn-cartoon:hover {
+    @apply -translate-y-0.5;
+    box-shadow: 0 4px 15px rgba(0, 255, 0, 0.5);
+  }
+
+  .btn-cartoon:active {
+    @apply translate-y-0;
+    box-shadow: 0 2px 8px rgba(0, 255, 0, 0.3);
+  }
+
+  .btn-cartoon::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+
+  .btn-cartoon:hover::after {
+    transform: translateX(100%);
+  }
+
+  .btn-cartoon-outline {
+    @apply inline-flex items-center justify-center px-5 py-2 font-cartoon text-sm
+      border-2 border-green-neon text-green-neon rounded-lg transition-all duration-300;
+  }
+
+  .btn-cartoon-outline:hover {
+    @apply bg-green-neon/10 -translate-y-0.5;
+    box-shadow: 0 4px 20px rgba(0, 255, 0, 0.2);
+  }
+
+  .title-cartoon {
+    @apply font-cartoon tracking-wide;
+    text-shadow: 1px 1px 0px rgba(0, 255, 0, 0.3);
+  }
+
+  .badge-cartoon {
+    @apply inline-flex items-center px-2 py-0.5 text-[10px] font-body font-bold uppercase tracking-wider
+      rounded-md bg-green-neon/20 text-green-neon border border-green-neon/30;
+  }
+
+  .input-cartoon {
+    @apply w-full px-3 py-2 bg-dark-50 border-2 border-dark-100 rounded-lg text-sm text-white
+      placeholder-gray-500 transition-all duration-200 outline-none;
+  }
+
+  .input-cartoon:focus {
+    @apply border-green-neon/50;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+  }
+
+  .pix-container {
+    @apply relative overflow-hidden rounded-2xl border-2 border-green-neon/30;
+    background: linear-gradient(135deg, rgba(0, 255, 0, 0.05) 0%, transparent 50%, rgba(0, 255, 0, 0.05) 100%);
+  }
+
+  .pix-container::before {
+    content: 'PIX';
+    @apply absolute -top-6 -right-6 font-cartoon text-8xl text-green-neon/5 select-none;
+    transform: rotate(15deg);
+  }
+
+  .admin-sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 transition-all duration-200;
+  }
+
+  .admin-sidebar-link:hover {
+    @apply bg-green-neon/10 text-green-neon;
+  }
+
+  .admin-sidebar-link.active {
+    @apply bg-green-neon/15 text-green-neon border border-green-neon/30;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+  }
+
+  .speech-bubble {
+    @apply relative bg-dark-50 border-2 border-green-neon/30 rounded-2xl p-4;
+  }
+
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -16px;
+    left: 30px;
+    border-width: 16px 16px 0;
+    border-style: solid;
+    border-color: rgba(0, 255, 0, 0.3) transparent transparent;
+  }
+
+  .cartoon-divider {
+    height: 4px;
+    background: repeating-linear-gradient(
+      90deg,
+      rgba(0, 255, 0, 0.3) 0px,
+      rgba(0, 255, 0, 0.3) 10px,
+      transparent 10px,
+      transparent 20px
+    );
+  }
+
+  .status-pending {
+    @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30;
+  }
+
+  .status-paid {
+    @apply bg-green-bright/20 text-green-bright border border-green-bright/30;
+  }
+
+  .status-cancelled {
+    @apply bg-red-500/20 text-red-400 border border-red-500/30;
+  }
+
+  .glow-text {
+    text-shadow: 0 0 20px rgba(0, 255, 0, 0.5), 0 0 40px rgba(0, 255, 0, 0.3);
+  }
+
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    @apply bg-dark-950;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    @apply bg-dark-100 rounded-full;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    @apply bg-dark-200;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
