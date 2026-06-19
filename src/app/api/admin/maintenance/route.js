@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAdminFromRequest } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   const setting = await prisma.setting.findUnique({ where: { key: 'maintenance_mode' } })
   return NextResponse.json({ enabled: setting?.value === 'true' })
