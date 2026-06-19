@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { getUserFromRequest } from '@/lib/auth'
+
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const productId = Number(searchParams.get('productId'))
-  if (!productId) return NextResponse.json({ error: 'productId é obrigatório' }, { status: 400 })
+  if (!productId) return NextResponse.json({ error: 'productId Ã© obrigatÃ³rio' }, { status: 400 })
 
   const reviews = await prisma.review.findMany({
     where: { productId },
@@ -15,19 +18,20 @@ export async function GET(request) {
   return NextResponse.json(reviews)
 }
 
+
 export async function POST(request) {
   const user = getUserFromRequest(request)
-  if (!user) return NextResponse.json({ error: 'Faça login' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'FaÃ§a login' }, { status: 401 })
 
   const { productId, rating, comment } = await request.json()
   if (!productId || !rating || rating < 1 || rating > 5) {
-    return NextResponse.json({ error: 'Dados inválidos' }, { status: 400 })
+    return NextResponse.json({ error: 'Dados invÃ¡lidos' }, { status: 400 })
   }
 
   const existing = await prisma.review.findUnique({
     where: { userId_productId: { userId: user.id, productId } },
   })
-  if (existing) return NextResponse.json({ error: 'Você já avaliou este produto' }, { status: 400 })
+  if (existing) return NextResponse.json({ error: 'VocÃª jÃ¡ avaliou este produto' }, { status: 400 })
 
   await prisma.review.create({
     data: { productId, userId: user.id, rating, comment: comment || '' },

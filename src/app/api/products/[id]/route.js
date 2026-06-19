@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { logActivity } from '@/lib/activity'
 
 export async function PUT(request, { params }) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const id = Number(params.id)
   const data = await request.json()
@@ -31,11 +34,11 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const id = Number(params.id)
   const product = await prisma.product.findUnique({ where: { id } })
-  if (!product) return NextResponse.json({ error: 'Produto não encontrado' }, { status: 404 })
+  if (!product) return NextResponse.json({ error: 'Produto nÃ£o encontrado' }, { status: 404 })
   await prisma.product.delete({ where: { id } })
   await logActivity(admin.id, admin.username, 'product_delete', `Removeu produto: ${product.name}`)
   return NextResponse.json({ success: true })
@@ -53,7 +56,7 @@ export async function GET(request, { params }) {
       },
     },
   })
-  if (!product) return NextResponse.json({ error: 'Produto não encontrado' }, { status: 404 })
+  if (!product) return NextResponse.json({ error: 'Produto nÃ£o encontrado' }, { status: 404 })
   if (product.deliveryType === 'auto') {
     const codes = await prisma.code.findMany({ where: { productId: id, used: false } })
     product.stock = codes.length

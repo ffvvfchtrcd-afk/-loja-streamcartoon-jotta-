@@ -1,6 +1,9 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { logActivity } from '@/lib/activity'
+
 
 export async function GET(request) {
   const { getAdminFromRequest } = await import('@/lib/auth')
@@ -83,10 +86,11 @@ export async function GET(request) {
   })
 }
 
+
 export async function POST(request) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const data = await request.json()
   const { images, ...productData } = data

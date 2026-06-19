@@ -1,7 +1,10 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { generateUserToken } from '@/lib/auth'
+
 
 export async function POST(request) {
   const { username, password } = await request.json()
@@ -23,7 +26,7 @@ export async function POST(request) {
         })
       }
     } else {
-      return NextResponse.json({ error: 'Usuário ou senha inválidos' }, { status: 401 })
+      return NextResponse.json({ error: 'UsuÃ¡rio ou senha invÃ¡lidos' }, { status: 401 })
     }
   }
 

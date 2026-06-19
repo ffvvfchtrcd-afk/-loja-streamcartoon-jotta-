@@ -1,10 +1,13 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
+
 
 export async function GET(request) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const type = searchParams.get('type') || 'orders'
@@ -30,7 +33,7 @@ export async function GET(request) {
     })
 
     csv = [
-      'ID,Cliente,Email,WhatsApp,Produto,Quantidade,Total,Desconto,Método Pagamento,Status,Código Entregue,Data',
+      'ID,Cliente,Email,WhatsApp,Produto,Quantidade,Total,Desconto,MÃ©todo Pagamento,Status,CÃ³digo Entregue,Data',
       ...orders.map(o =>
         [
           o.id,
@@ -56,7 +59,7 @@ export async function GET(request) {
     })
 
     csv = [
-      'ID,Nome,Preço,Categoria,DeliveryType,Criado em',
+      'ID,Nome,PreÃ§o,Categoria,DeliveryType,Criado em',
       ...products.map(p =>
         [
           p.id,
@@ -86,7 +89,7 @@ export async function GET(request) {
     })
 
     csv = [
-      'Mês,Pedidos Pagos,Faturamento',
+      'MÃªs,Pedidos Pagos,Faturamento',
       ...Object.entries(monthly).map(([month, data]) =>
         [month, data.count, data.revenue.toFixed(2)].join(',')
       ),

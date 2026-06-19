@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { getAdminFromRequest, getUserFromRequest } from '@/lib/auth'
+
 
 export async function GET(request) {
   const admin = getAdminFromRequest(request)
   const user = getUserFromRequest(request)
-  if (!admin && !user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin && !user) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const mine = searchParams.get('mine')
@@ -17,7 +20,7 @@ export async function GET(request) {
   if (mine && user) {
     where = { userId: user.id }
   } else if (!admin) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
   }
 
   if (type) where = { ...where, type }
@@ -37,12 +40,13 @@ export async function GET(request) {
   return NextResponse.json(tickets)
 }
 
+
 export async function POST(request) {
   const user = getUserFromRequest(request)
-  if (!user) return NextResponse.json({ error: 'Faça login para abrir um ticket' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'FaÃ§a login para abrir um ticket' }, { status: 401 })
 
   const { orderId, subject, category, message } = await request.json()
-  if (!subject) return NextResponse.json({ error: 'Assunto é obrigatório' }, { status: 400 })
+  if (!subject) return NextResponse.json({ error: 'Assunto Ã© obrigatÃ³rio' }, { status: 400 })
 
   const ticket = await prisma.ticket.create({
     data: {

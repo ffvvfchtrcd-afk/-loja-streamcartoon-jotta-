@@ -1,4 +1,7 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { logActivity } from '@/lib/activity'
 import { getAdminFromRequest, getUserFromRequest } from '@/lib/auth'
@@ -6,7 +9,7 @@ import { getAdminFromRequest, getUserFromRequest } from '@/lib/auth'
 export async function GET(request, { params }) {
   const admin = getAdminFromRequest(request)
   const user = getUserFromRequest(request)
-  if (!admin && !user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin && !user) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const id = Number(params.id)
   const ticket = await prisma.ticket.findUnique({
@@ -19,22 +22,22 @@ export async function GET(request, { params }) {
     },
   })
 
-  if (!ticket) return NextResponse.json({ error: 'Ticket não encontrado' }, { status: 404 })
-  if (!admin && ticket.userId !== user?.id) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!ticket) return NextResponse.json({ error: 'Ticket nÃ£o encontrado' }, { status: 404 })
+  if (!admin && ticket.userId !== user?.id) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   return NextResponse.json(ticket)
 }
 
 export async function PATCH(request, { params }) {
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const { status, action } = await request.json()
   const id = Number(params.id)
 
   if (action === 'assign') {
     const ticket = await prisma.ticket.findUnique({ where: { id } })
-    if (!ticket) return NextResponse.json({ error: 'Ticket não encontrado' }, { status: 404 })
+    if (!ticket) return NextResponse.json({ error: 'Ticket nÃ£o encontrado' }, { status: 404 })
 
     const updated = await prisma.ticket.update({
       where: { id },
@@ -49,13 +52,13 @@ export async function PATCH(request, { params }) {
       where: { id },
       data: { assignedTo: null },
     })
-    await logActivity(admin.id, admin.username, 'ticket_unassign', `Removeu atribuição do ticket #${id}`)
+    await logActivity(admin.id, admin.username, 'ticket_unassign', `Removeu atribuiÃ§Ã£o do ticket #${id}`)
     return NextResponse.json(updated)
   }
 
   if (action === 'block') {
     const ticket = await prisma.ticket.findUnique({ where: { id } })
-    if (!ticket) return NextResponse.json({ error: 'Ticket não encontrado' }, { status: 404 })
+    if (!ticket) return NextResponse.json({ error: 'Ticket nÃ£o encontrado' }, { status: 404 })
     if (ticket.deliveredAt) return NextResponse.json({ error: 'Ticket finalizado' }, { status: 400 })
 
     const updated = await prisma.ticket.update({
@@ -68,17 +71,17 @@ export async function PATCH(request, { params }) {
         ticketId: id,
         senderType: 'system',
         senderId: admin.id,
-        message: '🔇 Usuário bloqueado neste ticket pelo administrador.',
+        message: 'ðŸ”‡ UsuÃ¡rio bloqueado neste ticket pelo administrador.',
       },
     })
 
-    await logActivity(admin.id, admin.username, 'ticket_block', `Bloqueou usuário no ticket #${id}`)
+    await logActivity(admin.id, admin.username, 'ticket_block', `Bloqueou usuÃ¡rio no ticket #${id}`)
     return NextResponse.json(updated)
   }
 
   if (action === 'unblock') {
     const ticket = await prisma.ticket.findUnique({ where: { id } })
-    if (!ticket) return NextResponse.json({ error: 'Ticket não encontrado' }, { status: 404 })
+    if (!ticket) return NextResponse.json({ error: 'Ticket nÃ£o encontrado' }, { status: 404 })
 
     const updated = await prisma.ticket.update({
       where: { id },
@@ -90,11 +93,11 @@ export async function PATCH(request, { params }) {
         ticketId: id,
         senderType: 'system',
         senderId: admin.id,
-        message: '🔊 Usuário desbloqueado. Pode responder novamente.',
+        message: 'ðŸ”Š UsuÃ¡rio desbloqueado. Pode responder novamente.',
       },
     })
 
-    await logActivity(admin.id, admin.username, 'ticket_unblock', `Desbloqueou usuário no ticket #${id}`)
+    await logActivity(admin.id, admin.username, 'ticket_unblock', `Desbloqueou usuÃ¡rio no ticket #${id}`)
     return NextResponse.json(updated)
   }
 
@@ -103,9 +106,9 @@ export async function PATCH(request, { params }) {
       where: { id },
       include: { order: true },
     })
-    if (!ticket) return NextResponse.json({ error: 'Ticket não encontrado' }, { status: 404 })
-    if (ticket.type !== 'delivery') return NextResponse.json({ error: 'Ticket não é de entrega' }, { status: 400 })
-    if (ticket.deliveredAt) return NextResponse.json({ error: 'Produto já foi entregue' }, { status: 400 })
+    if (!ticket) return NextResponse.json({ error: 'Ticket nÃ£o encontrado' }, { status: 404 })
+    if (ticket.type !== 'delivery') return NextResponse.json({ error: 'Ticket nÃ£o Ã© de entrega' }, { status: 400 })
+    if (ticket.deliveredAt) return NextResponse.json({ error: 'Produto jÃ¡ foi entregue' }, { status: 400 })
 
     await prisma.ticket.update({
       where: { id: ticket.id },
@@ -122,7 +125,7 @@ export async function PATCH(request, { params }) {
         ticketId: ticket.id,
         senderType: 'system',
         senderId: admin.id,
-        message: '✅ Produto entregue com sucesso!',
+        message: 'âœ… Produto entregue com sucesso!',
       },
     })
 
@@ -132,9 +135,9 @@ export async function PATCH(request, { params }) {
 
   if (action === 'toggleUserReply') {
     const ticket = await prisma.ticket.findUnique({ where: { id } })
-    if (!ticket) return NextResponse.json({ error: 'Ticket não encontrado' }, { status: 404 })
+    if (!ticket) return NextResponse.json({ error: 'Ticket nÃ£o encontrado' }, { status: 404 })
     if (ticket.type !== 'delivery') return NextResponse.json({ error: 'Apenas tickets de entrega' }, { status: 400 })
-    if (ticket.deliveredAt) return NextResponse.json({ error: 'Produto já entregue' }, { status: 400 })
+    if (ticket.deliveredAt) return NextResponse.json({ error: 'Produto jÃ¡ entregue' }, { status: 400 })
 
     const updated = await prisma.ticket.update({
       where: { id },

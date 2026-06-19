@@ -1,10 +1,13 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { getAdminFromRequest } from '@/lib/auth'
 
 export async function GET(request, { params }) {
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const user = await prisma.user.findUnique({
     where: { id: Number(params.id) },
@@ -20,7 +23,7 @@ export async function GET(request, { params }) {
     },
   })
 
-  if (!user) return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
+  if (!user) return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o encontrado' }, { status: 404 })
 
   const paidOrders = user.orders.filter(o => o.status === 'paid')
   const totalSpent = paidOrders.reduce((s, o) => s + o.total, 0)

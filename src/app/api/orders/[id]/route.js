@@ -1,4 +1,7 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { logActivity } from '@/lib/activity'
 
@@ -17,10 +20,10 @@ export async function GET(request, { params }) {
       tickets: { select: { id: true, status: true, subject: true, userId: true, type: true } },
     },
   })
-  if (!order) return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 })
+  if (!order) return NextResponse.json({ error: 'Pedido nÃ£o encontrado' }, { status: 404 })
 
   if (!admin && user && order.userId && order.userId !== user.id) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
   }
 
   const ticket = order.tickets?.[0] || null
@@ -32,14 +35,14 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const { status } = await request.json()
   const id = Number(params.id)
 
   if (status === 'paid') {
     const order = await prisma.order.findUnique({ where: { id }, include: { product: true, user: true } })
-    if (!order) return NextResponse.json({ error: 'Pedido não encontrado' }, { status: 404 })
+    if (!order) return NextResponse.json({ error: 'Pedido nÃ£o encontrado' }, { status: 404 })
 
     if (order.product.deliveryType === 'auto') {
       const availableCode = await prisma.code.findFirst({
@@ -47,7 +50,7 @@ export async function PATCH(request, { params }) {
       })
 
       if (!availableCode) {
-        return NextResponse.json({ error: 'Sem códigos disponíveis para este produto' }, { status: 400 })
+        return NextResponse.json({ error: 'Sem cÃ³digos disponÃ­veis para este produto' }, { status: 400 })
       }
 
       await prisma.code.update({
@@ -67,7 +70,7 @@ export async function PATCH(request, { params }) {
             data: {
               orderId: id,
               userId: order.userId,
-              subject: `Pedido #${id} — ${order.product?.name || 'Produto'}`,
+              subject: `Pedido #${id} â€” ${order.product?.name || 'Produto'}`,
               status: 'closed',
               type: 'delivery',
             },
@@ -77,7 +80,7 @@ export async function PATCH(request, { params }) {
               ticketId: ticket.id,
               senderType: 'admin',
               senderId: admin.id,
-              message: `✅ Pagamento confirmado! Seu código foi liberado:\n\n📌 Código: ${availableCode.value}\n\nGuarde este código em um local seguro. Ele já está disponível na página do pedido também.`,
+              message: `âœ… Pagamento confirmado! Seu cÃ³digo foi liberado:\n\nðŸ“Œ CÃ³digo: ${availableCode.value}\n\nGuarde este cÃ³digo em um local seguro. Ele jÃ¡ estÃ¡ disponÃ­vel na pÃ¡gina do pedido tambÃ©m.`,
             },
           })
         }
@@ -100,7 +103,7 @@ export async function PATCH(request, { params }) {
             data: {
               orderId: id,
               userId: order.userId,
-              subject: `📦 Entrega - Pedido #${id} — ${order.product?.name || 'Produto'}`,
+              subject: `ðŸ“¦ Entrega - Pedido #${id} â€” ${order.product?.name || 'Produto'}`,
               status: 'open',
               type: 'delivery',
             },
@@ -110,7 +113,7 @@ export async function PATCH(request, { params }) {
               ticketId: ticket.id,
               senderType: 'admin',
               senderId: admin.id,
-              message: `✅ Pagamento confirmado!\n\nEm breve a entrega do seu produto será feita por aqui.\n\nA equipe já foi notificada e responderá em instantes.`,
+              message: `âœ… Pagamento confirmado!\n\nEm breve a entrega do seu produto serÃ¡ feita por aqui.\n\nA equipe jÃ¡ foi notificada e responderÃ¡ em instantes.`,
             },
           })
         }

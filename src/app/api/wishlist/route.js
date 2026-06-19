@@ -1,10 +1,13 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { getUserFromRequest } from '@/lib/auth'
 
+
 export async function GET(request) {
   const user = getUserFromRequest(request)
-  if (!user) return NextResponse.json({ error: 'Faça login' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'FaÃ§a login' }, { status: 401 })
 
   const items = await prisma.wishlistItem.findMany({
     where: { userId: user.id },
@@ -14,12 +17,13 @@ export async function GET(request) {
   return NextResponse.json(items)
 }
 
+
 export async function POST(request) {
   const user = getUserFromRequest(request)
-  if (!user) return NextResponse.json({ error: 'Faça login' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'FaÃ§a login' }, { status: 401 })
 
   const { productId } = await request.json()
-  if (!productId) return NextResponse.json({ error: 'productId é obrigatório' }, { status: 400 })
+  if (!productId) return NextResponse.json({ error: 'productId Ã© obrigatÃ³rio' }, { status: 400 })
 
   const existing = await prisma.wishlistItem.findUnique({
     where: { userId_productId: { userId: user.id, productId } },

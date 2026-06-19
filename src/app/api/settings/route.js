@@ -1,21 +1,25 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { logActivity } from '@/lib/activity'
+
 
 export async function GET(request) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const settings = await prisma.setting.findMany()
   const map = Object.fromEntries(settings.map(s => [s.key, s.value]))
   return NextResponse.json(map)
 }
 
+
 export async function POST(request) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const data = await request.json()
 
@@ -27,6 +31,6 @@ export async function POST(request) {
     })
   }
 
-  await logActivity(admin.id, admin.username, 'settings_update', 'Atualizou configurações')
+  await logActivity(admin.id, admin.username, 'settings_update', 'Atualizou configuraÃ§Ãµes')
   return NextResponse.json({ success: true })
 }

@@ -1,5 +1,8 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
+
 
 export async function POST(request) {
   try {
@@ -91,15 +94,15 @@ async function confirmAndDeliver(order) {
         data: {
           orderId: order.id,
           userId: order.userId,
-          subject: `Pedido #${order.id} — ${order.product?.name || 'Produto'}`,
+          subject: `Pedido #${order.id} â€” ${order.product?.name || 'Produto'}`,
           status: 'closed',
           type: 'delivery',
         },
       })
 
       const message = deliveredCode
-        ? `✅ Pagamento confirmado! Seu código foi liberado:\n\n📌 Código: ${deliveredCode}\n\nGuarde este código em um local seguro. Ele já está disponível na página do pedido também.`
-        : `✅ Pagamento confirmado! Em breve seu código será liberado.`
+        ? `âœ… Pagamento confirmado! Seu cÃ³digo foi liberado:\n\nðŸ“Œ CÃ³digo: ${deliveredCode}\n\nGuarde este cÃ³digo em um local seguro. Ele jÃ¡ estÃ¡ disponÃ­vel na pÃ¡gina do pedido tambÃ©m.`
+        : `âœ… Pagamento confirmado! Em breve seu cÃ³digo serÃ¡ liberado.`
 
       await prisma.ticketMessage.create({
         data: {

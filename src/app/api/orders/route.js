@@ -1,6 +1,9 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { generatePixPayment } from '@/lib/pix'
+
 
 export async function GET(request) {
   const { getAdminFromRequest, getUserFromRequest } = await import('@/lib/auth')
@@ -24,7 +27,7 @@ export async function GET(request) {
     return NextResponse.json(orders)
   }
 
-  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
 
   const where = status ? { status } : {}
   const orders = await prisma.order.findMany({
@@ -39,11 +42,12 @@ export async function GET(request) {
   return NextResponse.json(orders)
 }
 
+
 export async function POST(request) {
   try {
     const { getUserFromRequest } = await import('@/lib/auth')
     const user = getUserFromRequest(request)
-    if (!user) return NextResponse.json({ error: 'Faça login para comprar' }, { status: 401 })
+    if (!user) return NextResponse.json({ error: 'FaÃ§a login para comprar' }, { status: 401 })
 
     const body = await request.json()
     const { customerName, customerEmail, customerWhats, items, couponCode } = body
@@ -59,7 +63,7 @@ export async function POST(request) {
     })
 
     if (products.length !== items.length) {
-      return NextResponse.json({ error: 'Um ou mais produtos não encontrados' }, { status: 404 })
+      return NextResponse.json({ error: 'Um ou mais produtos nÃ£o encontrados' }, { status: 404 })
     }
 
     const productMap = Object.fromEntries(products.map(p => [p.id, p]))
@@ -86,7 +90,7 @@ export async function POST(request) {
     if (couponCode) {
       const coupon = await prisma.coupon.findUnique({ where: { code: couponCode } })
       if (!coupon || !coupon.active) {
-        return NextResponse.json({ error: 'Cupom inválido' }, { status: 400 })
+        return NextResponse.json({ error: 'Cupom invÃ¡lido' }, { status: 400 })
       }
       if (coupon.maxUses > 0 && coupon.usedCount >= coupon.maxUses) {
         return NextResponse.json({ error: 'Cupom esgotado' }, { status: 400 })
@@ -95,7 +99,7 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Cupom expirado' }, { status: 400 })
       }
       if (subtotal < coupon.minPurchase) {
-        return NextResponse.json({ error: 'Valor mínimo do cupom não atingido' }, { status: 400 })
+        return NextResponse.json({ error: 'Valor mÃ­nimo do cupom nÃ£o atingido' }, { status: 400 })
       }
 
       if (coupon.discountType === 'percentage') {
@@ -115,7 +119,7 @@ export async function POST(request) {
     const settings = await prisma.setting.findMany()
     const settingsMap = Object.fromEntries(settings.map(s => [s.key, s.value]))
 
-    // Criar pedido com múltiplos itens
+    // Criar pedido com mÃºltiplos itens
     const order = await prisma.order.create({
       data: {
         userId: user.id,
@@ -139,7 +143,7 @@ export async function POST(request) {
       },
     })
 
-    // Gerar PIX (usando o primeiro item para identificação)
+    // Gerar PIX (usando o primeiro item para identificaÃ§Ã£o)
     const pixData = await generatePixPayment(
       { ...order, productName: order.items[0]?.product?.name || 'Pedido StreamCartoon' },
       settingsMap.mercadopago_token

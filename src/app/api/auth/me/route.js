@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { getUserFromRequest } from '@/lib/auth'
+
 
 export async function GET(request) {
   const userData = getUserFromRequest(request)
   if (!userData) {
-    return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+    return NextResponse.json({ error: 'NÃ£o autenticado' }, { status: 401 })
   }
 
   const user = await prisma.user.findUnique({
@@ -22,7 +25,7 @@ export async function GET(request) {
   })
 
   if (!user) {
-    return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
+    return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o encontrado' }, { status: 404 })
   }
 
   const paidOrders = user.orders.filter(o => o.status === 'paid')
