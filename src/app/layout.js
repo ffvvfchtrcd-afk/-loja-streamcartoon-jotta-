@@ -21,7 +21,7 @@ const inter = Inter({
 
 export const metadata = {
   title: 'StreamCartoon - Assinaturas Premium',
-  description: 'Sua loja de assinaturas de streaming com os melhores preços. Netflix, Disney+, HBO Max e mais!',
+  description: 'Sua loja de assinaturas de streaming com os melhores preços. Netflix, Disney+, HBO Max e muito mais!',
   icons: {
     icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🎬</text></svg>',
   },
