@@ -7,14 +7,14 @@ import { getUserFromRequest } from '@/lib/auth'
 
 export async function GET(request) {
   const user = getUserFromRequest(request)
-  if (!user) return NextResponse.json({ error: 'FaÃ§a login' }, { status: 401 })
+  if (!user) return NextResponse.json({ items: [] })
 
   const items = await prisma.wishlistItem.findMany({
     where: { userId: user.id },
     include: { product: true },
     orderBy: { createdAt: 'desc' },
   })
-  return NextResponse.json(items)
+  return NextResponse.json({ items })
 }
 
 
