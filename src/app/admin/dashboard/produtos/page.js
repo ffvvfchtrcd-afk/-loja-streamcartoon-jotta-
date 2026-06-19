@@ -30,6 +30,7 @@ export default function AdminProdutos() {
   const [step, setStep] = useState(1)
   const { toast, showToast, closeToast } = useToast()
   const [uploading, setUploading] = useState(false)
+  const [urlInput, setUrlInput] = useState('')
   const fileInputRef = useRef(null)
 
   const categories = categoriesResult?.categories || []
@@ -92,6 +93,18 @@ export default function AdminProdutos() {
 
   const removeImage = (index) => {
     setForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }))
+  }
+
+  const addUrlImage = () => {
+    const url = urlInput.trim()
+    if (!url) return
+    if (form.images.length >= 9) {
+      showToast('Máximo de 9 fotos', 'error')
+      return
+    }
+    setForm(prev => ({ ...prev, images: [...prev.images, url] }))
+    setUrlInput('')
+    showToast('Imagem adicionada!', 'success')
   }
 
   const handleSave = async (e) => {
@@ -242,8 +255,26 @@ export default function AdminProdutos() {
               className="hidden"
             />
 
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={urlInput}
+                onChange={e => setUrlInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addUrlImage()}
+                placeholder="Ou cole uma URL de imagem..."
+                className="input-cartoon flex-1 text-sm"
+              />
+              <button
+                onClick={addUrlImage}
+                disabled={!urlInput.trim() || form.images.length >= 9}
+                className="btn-cartoon bg-green-neon/20 text-green-neon border border-green-neon/30 hover:bg-green-neon/30 px-3 rounded-lg disabled:opacity-30 text-sm"
+              >
+                Adicionar
+              </button>
+            </div>
+
             <p className="text-xs text-gray-500 text-center">
-              {form.images.length}/9 fotos • Formatos: JPG, PNG, WEBP
+              {form.images.length}/9 fotos • Upload do PC ou URL externa
             </p>
           </div>
         )
