@@ -94,15 +94,15 @@ async function confirmAndDeliver(order) {
         data: {
           orderId: order.id,
           userId: order.userId,
-          subject: `Pedido #${order.id} â€” ${order.product?.name || 'Produto'}`,
+          subject: `Pedido #${order.id} - ${order.product?.name || 'Produto'}`,
           status: 'closed',
           type: 'delivery',
         },
       })
 
       const message = deliveredCode
-        ? `âœ… Pagamento confirmado! Seu cÃ³digo foi liberado:\n\nðŸ“Œ CÃ³digo: ${deliveredCode}\n\nGuarde este cÃ³digo em um local seguro. Ele jÃ¡ estÃ¡ disponÃ­vel na pÃ¡gina do pedido tambÃ©m.`
-        : `âœ… Pagamento confirmado! Em breve seu cÃ³digo serÃ¡ liberado.`
+        ? `Pagamento confirmado! Seu c\u00f3digo foi liberado:\n\nC\u00f3digo: ${deliveredCode}\n\nGuarde este c\u00f3digo em um local seguro. Ele j\u00e1 est\u00e1 dispon\u00edvel na p\u00e1gina do pedido tamb\u00e9m.`
+        : `Pagamento confirmado! Em breve seu c\u00f3digo ser\u00e1 liberado.`
 
       await prisma.ticketMessage.create({
         data: {

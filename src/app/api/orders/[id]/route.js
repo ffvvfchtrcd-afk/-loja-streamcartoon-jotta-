@@ -80,7 +80,7 @@ export async function PATCH(request, { params }) {
               ticketId: ticket.id,
               senderType: 'admin',
               senderId: admin.id,
-              message: `âœ… Pagamento confirmado! Seu cÃ³digo foi liberado:\n\nðŸ“Œ CÃ³digo: ${availableCode.value}\n\nGuarde este cÃ³digo em um local seguro. Ele jÃ¡ estÃ¡ disponÃ­vel na pÃ¡gina do pedido tambÃ©m.`,
+              message: `Pagamento confirmado! Seu c\u00f3digo foi liberado:\n\nC\u00f3digo: ${availableCode.value}\n\nGuarde este c\u00f3digo em um local seguro. Ele j\u00e1 est\u00e1 dispon\u00edvel na p\u00e1gina do pedido tamb\u00e9m.`,
             },
           })
         }
@@ -103,7 +103,7 @@ export async function PATCH(request, { params }) {
             data: {
               orderId: id,
               userId: order.userId,
-              subject: `ðŸ“¦ Entrega - Pedido #${id} â€” ${order.product?.name || 'Produto'}`,
+              subject: `Entrega - Pedido #${id} - ${order.product?.name || 'Produto'}`,
               status: 'open',
               type: 'delivery',
             },
@@ -113,7 +113,7 @@ export async function PATCH(request, { params }) {
               ticketId: ticket.id,
               senderType: 'admin',
               senderId: admin.id,
-              message: `âœ… Pagamento confirmado!\n\nEm breve a entrega do seu produto serÃ¡ feita por aqui.\n\nA equipe jÃ¡ foi notificada e responderÃ¡ em instantes.`,
+              message: `Pagamento confirmado!\n\nEm breve a entrega do seu produto ser\u00e1 feita por aqui.\n\nA equipe j\u00e1 foi notificada e responder\u00e1 em instantes.`,
             },
           })
         }
