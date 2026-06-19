@@ -31,6 +31,7 @@ export default function AdminProdutos() {
   const { toast, showToast, closeToast } = useToast()
   const [uploading, setUploading] = useState(false)
   const [urlInput, setUrlInput] = useState('')
+  const [pendingImages, setPendingImages] = useState([])
   const fileInputRef = useRef(null)
 
   const categories = categoriesResult?.categories || []
@@ -43,6 +44,7 @@ export default function AdminProdutos() {
   const openCreate = () => {
     setEditing(null)
     setForm({ name: '', description: '', price: '', category: '🎬 Netflix', active: true, deliveryType: 'auto', images: [] })
+    setPendingImages([])
     setStep(1)
     setShowModal(true)
   }
@@ -58,47 +60,44 @@ export default function AdminProdutos() {
       deliveryType: product.deliveryType || 'auto',
       images: product.images?.map(i => i.url) || [],
     })
+    setPendingImages([])
     setStep(1)
     setShowModal(true)
   }
 
   const handleUpload = async (e) => {
     const files = Array.from(e.target.files || [])
-    if (form.images.length + files.length > 9) {
+    const total = form.images.length + pendingImages.length + files.length
+    if (total > 9) {
       showToast('Máximo de 9 fotos', 'error')
       return
     }
     setUploading(true)
-    try {
-      const formData = new FormData()
-      files.forEach(f => formData.append('files', f))
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        body: formData,
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setForm(prev => ({ ...prev, images: [...prev.images, ...data.urls] }))
-        showToast(`${data.urls.length} foto(s) enviada(s)!`, 'success')
-      } else {
-        showToast('Erro ao enviar fotos', 'error')
-      }
-    } catch {
-      showToast('Erro ao enviar fotos', 'error')
-    }
+    const newPending = await Promise.all(files.map(file => new Promise(resolve => {
+      const reader = new FileReader()
+      reader.onload = (ev) => resolve({ file, preview: ev.target.result })
+      reader.readAsDataURL(file)
+    })))
+    setPendingImages(prev => [...prev, ...newPending])
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const removeImage = (index) => {
-    setForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }))
+    const imagesCount = form.images.length
+    if (index < imagesCount) {
+      setForm(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }))
+    } else {
+      setPendingImages(prev => prev.filter((_, i) => i !== index - imagesCount))
+    }
   }
+
+  const allImages = [...form.images, ...pendingImages.map(p => p.preview)]
 
   const addUrlImage = () => {
     const url = urlInput.trim()
     if (!url) return
-    if (form.images.length >= 9) {
+    if (form.images.length + pendingImages.length >= 9) {
       showToast('Máximo de 9 fotos', 'error')
       return
     }
@@ -110,10 +109,26 @@ export default function AdminProdutos() {
   const handleSave = async (e) => {
     e.preventDefault()
     const token = localStorage.getItem('token')
+
+    let uploadedUrls = [...form.images]
+    if (pendingImages.length > 0) {
+      const formData = new FormData()
+      pendingImages.forEach(p => formData.append('files', p.file))
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      })
+      if (uploadRes.ok) {
+        const uploadData = await uploadRes.json()
+        uploadedUrls = [...uploadedUrls, ...uploadData.urls]
+      }
+    }
+
     const data = {
       ...form,
       price: parseFloat(form.price),
-      images: form.images,
+      images: uploadedUrls,
     }
     const url = editing ? `/api/products/${editing.id}` : '/api/products'
     const method = editing ? 'PUT' : 'POST'
@@ -213,7 +228,7 @@ export default function AdminProdutos() {
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              {form.images.map((url, i) => (
+              {allImages.map((url, i) => (
                 <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border-2 border-dark-100 bg-dark-950">
                   <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
                   <button
@@ -228,7 +243,7 @@ export default function AdminProdutos() {
                 </div>
               ))}
 
-              {form.images.length < 9 && (
+              {allImages.length < 9 && (
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
@@ -266,7 +281,7 @@ export default function AdminProdutos() {
               />
               <button
                 onClick={addUrlImage}
-                disabled={!urlInput.trim() || form.images.length >= 9}
+                disabled={!urlInput.trim() || allImages.length >= 9}
                 className="btn-cartoon bg-green-neon/20 text-green-neon border border-green-neon/30 hover:bg-green-neon/30 px-3 rounded-lg disabled:opacity-30 text-sm"
               >
                 Adicionar
@@ -274,7 +289,7 @@ export default function AdminProdutos() {
             </div>
 
             <p className="text-xs text-gray-500 text-center">
-              {form.images.length}/9 fotos • Upload do PC ou URL externa
+              {allImages.length}/9 fotos • Upload do PC ou URL externa
             </p>
           </div>
         )
@@ -375,11 +390,11 @@ export default function AdminProdutos() {
                 <span className="text-xs text-gray-500">Tipo de Entrega</span>
                 <p className="text-white capitalize">{form.deliveryType === 'auto' ? 'Automática' : 'Via Ticket'}</p>
               </div>
-              {form.images.length > 0 && (
+              {allImages.length > 0 && (
                 <div>
-                  <span className="text-xs text-gray-500">Fotos ({form.images.length})</span>
+                  <span className="text-xs text-gray-500">Fotos ({allImages.length})</span>
                   <div className="flex gap-2 mt-1">
-                    {form.images.map((url, i) => (
+                    {allImages.map((url, i) => (
                       <div key={i} className="w-14 h-14 rounded-lg overflow-hidden border border-dark-100">
                         <img src={url} alt="" className="w-full h-full object-cover" />
                       </div>
