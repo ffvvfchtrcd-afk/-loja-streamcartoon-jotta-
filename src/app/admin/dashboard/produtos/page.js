@@ -550,7 +550,7 @@ export default function AdminProdutos() {
       ) : (
         <div className="grid gap-4">
           {products.map(product => (
-              <div key={product.id} className={`card-cartoon flex flex-col md:flex-row items-start md:items-center gap-4 p-4 animate-slide-up ${!product.category ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}>
+              <div key={product.id} className={`card-cartoon flex items-start md:items-center gap-4 p-4 animate-slide-up ${!product.category ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}>
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-dark-100 to-dark-950 flex-shrink-0">
                 {product.images?.length > 0 ? (
                   <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover" />
@@ -561,12 +561,12 @@ export default function AdminProdutos() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="font-medium text-white">{product.name}</h3>
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                  <h3 className="font-medium text-white truncate max-w-[200px] md:max-w-none">{product.name}</h3>
                   {product.images?.length > 1 && (
-                    <span className="text-[10px] text-gray-500">+{product.images.length - 1} fotos</span>
+                    <span className="text-[10px] text-gray-500 flex-shrink-0">+{product.images.length - 1} fotos</span>
                   )}
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase ${
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase flex-shrink-0 ${
                     product.deliveryType === 'auto_v2'
                       ? 'bg-purple-500/10 text-purple-400 border border-purple-500/30'
                       : 'bg-green-500/10 text-green-400 border border-green-500/30'
@@ -576,15 +576,15 @@ export default function AdminProdutos() {
                 </div>
                 <p className="text-sm text-gray-400 truncate">{product.description}</p>
               </div>
-              <div className="text-right">
-                <p className="text-green-neon font-bold">R$ {product.price.toFixed(2)}</p>
+              <div className="text-right flex-shrink-0">
+                <p className="text-green-neon font-bold whitespace-nowrap">R$ {product.price.toFixed(2)}</p>
                 {product.category ? (
-                  <p className="text-xs text-gray-500">{product.category}</p>
+                  <p className="text-xs text-gray-500 truncate max-w-[120px]">{product.category}</p>
                 ) : (
-                  <p className="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded inline-block">⚠️ SEM CATEGORIA</p>
+                  <p className="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded">⚠️ SEM CATEGORIA</p>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-shrink-0">
                 <button onClick={() => openEdit(product)} className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors">
                   <HiPencil />
                 </button>
