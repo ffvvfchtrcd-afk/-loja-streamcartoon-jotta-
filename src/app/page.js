@@ -44,7 +44,7 @@ function HomeContent() {
   const totalPages = result?.totalPages || 1
   const total = result?.total || 0
 
-  const getCatName = (p) => p.categoryRel?.name || p.category || ''
+  const getCatName = (p) => p.category || ''
 
   const allCategories = products.length > 0
     ? ['Todas', ...new Set(products.map(getCatName).filter(Boolean))]

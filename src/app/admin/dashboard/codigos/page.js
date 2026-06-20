@@ -260,7 +260,7 @@ export default function AdminCodigos() {
                       {product.images?.[0]?.url ? (
                         <img src={product.images[0].url} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xl">{product.categoryRel?.icon || product.category?.charAt(0) || '?'}</div>
+                        <div className="w-full h-full flex items-center justify-center text-xl">{product.category?.charAt(0) || '?'}</div>
                       )}
                     </div>
 
@@ -271,7 +271,7 @@ export default function AdminCodigos() {
                           {getStatusLabel(product.available)}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500">{product.categoryRel?.icon} {product.category}</p>
+                      <p className="text-xs text-gray-500">{product.category}</p>
                     </div>
 
                     <div className="text-center px-4">

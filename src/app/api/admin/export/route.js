@@ -56,7 +56,6 @@ export async function GET(request) {
   } else if (type === 'products') {
     const products = await prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
-      include: { categoryRel: { select: { name: true, icon: true } } },
     })
 
     csv = [
@@ -66,7 +65,7 @@ export async function GET(request) {
           p.id,
           `"${p.name}"`,
           p.price.toFixed(2),
-          `"${p.categoryRel?.name || p.category}"`,
+          `"${p.category}"`,
           p.deliveryType,
           new Date(p.createdAt).toLocaleString('pt-BR'),
         ].join(',')

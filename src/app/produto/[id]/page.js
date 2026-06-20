@@ -163,8 +163,7 @@ export default function ProductPage() {
   }
 
   // Produtos relacionados (mesma categoria, excluindo o atual)
-  const getCat = (p) => p.categoryRel?.name || p.category || ''
-
+  const getCat = (p) => p.category || ''
   const relatedProducts = allProducts?.products
     ?.filter(p => getCat(p) === getCat(product) && p.id !== Number(id))
     ?.slice(0, 3) || []
@@ -223,7 +222,7 @@ export default function ProductPage() {
           <Link href="/" className="hover:text-green-neon transition-colors">Home</Link>
           <span>/</span>
           <Link href={`/?category=${encodeURIComponent(getCat(product))}`} className="hover:text-green-neon transition-colors">
-            {product.categoryRel?.icon} {product.category||getCat(product)}
+            {product.category || getCat(product)}
           </Link>
           <span>/</span>
           <span className="text-gray-400">{product.name}</span>
@@ -242,7 +241,7 @@ export default function ProductPage() {
                 />
               ) : (
                 <div className="aspect-video bg-gradient-to-br from-dark-100 to-dark-950 flex items-center justify-center text-8xl transition-all duration-500">
-                  {product.categoryRel?.icon || product.category?.split(' ')[0] || '📦'}
+                  {product.category?.split(' ')[0] || '📦'}
                 </div>
               )}
             </div>
@@ -262,7 +261,7 @@ export default function ProductPage() {
                       <img src={img.url} alt={product.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-dark-100 to-dark-950 flex items-center justify-center text-2xl">
-                  {product.categoryRel?.icon || product.category?.split(' ')[0] || '📦'}
+                  {product.category?.split(' ')[0] || '📦'}
                       </div>
                     )}
                   </button>
@@ -276,7 +275,7 @@ export default function ProductPage() {
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <h1 className="title-cartoon text-3xl md:text-4xl text-white mb-2">{product.name}</h1>
-                <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">{product.categoryRel?.icon} {product.category || getCat(product)}</p>
+                <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">{product.category}</p>
               </div>
               <button
                 onClick={toggleWishlist}
@@ -383,7 +382,7 @@ export default function ProductPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex justify-between p-3 rounded-xl bg-dark-50 border border-dark-100">
               <span className="text-gray-400">Categoria</span>
-              <span className="text-white font-medium">{product.categoryRel?.icon} {product.category || getCat(product)}</span>
+              <span className="text-white font-medium">{product.category}</span>
             </div>
             <div className="flex justify-between p-3 rounded-xl bg-dark-50 border border-dark-100">
               <span className="text-gray-400">Tipo de Entrega</span>
@@ -544,19 +543,19 @@ export default function ProductPage() {
                 }
                 if (el) el.innerHTML = data.results.map(p => {
                   const img = p.images?.[0]?.url || ''
-                  const category = (p.categoryRel?.name || p.category || '').split(' ').slice(1).join(' ')
+                  const category = (p.category || '').split(' ').slice(1).join(' ')
                   return \`
                     <a href="/produto/\${p.id}" class="card-cartoon group animate-slide-up block">
                       <div class="relative h-24 rounded-lg overflow-hidden mb-2 bg-dark-950">
                         \${img ? '<img src="' + img + '" alt="' + p.name + '" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />'
-                          : '<div class="w-full h-full bg-gradient-to-br from-dark-100 to-dark-950 flex items-center justify-center"><span class="text-3xl opacity-50">' + ((p.categoryRel?.icon || p.category?.split(' ')[0]) || '') + '</span></div>'}
+                          : '<div class="w-full h-full bg-gradient-to-br from-dark-100 to-dark-950 flex items-center justify-center"><span class="text-3xl opacity-50">' + (p.category?.split(' ')[0] || '') + '</span></div>'}
                         <div class="absolute inset-0 bg-gradient-to-t from-dark-50/80 to-transparent" />
                         <span class="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border bg-green-500/20 text-green-400 border-green-500/30">
                           \${p.stock || 0}
                         </span>
                       </div>
                       <h3 class="font-cartoon text-xs text-white mb-0.5 group-hover:text-green-neon transition-colors leading-tight truncate">\${p.name}</h3>
-                      <div class="text-xs text-gray-500 truncate">\${category || p.categoryRel?.name || p.category}</div>
+                      <div class="text-xs text-gray-500 truncate">\${category || p.category}</div>
                       <div class="text-green-neon font-bold text-sm mt-1">R$ \${Number(p.price).toFixed(2)}</div>
                     </a>
                   \`

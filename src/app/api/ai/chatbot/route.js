@@ -12,18 +12,18 @@ export async function POST(request) {
 
   const allProducts = await prisma.product.findMany({
     where: { active: true },
-    select: { id: true, name: true, price: true, description: true, category: true, categoryRel: { select: { name: true, icon: true } }, images: { take: 1, orderBy: { order: 'asc' }, select: { url: true } } },
+    select: { id: true, name: true, price: true, description: true, category: true, images: { take: 1, orderBy: { order: 'asc' }, select: { url: true } } },
     orderBy: { name: 'asc' },
   })
 
   const keywords = message.toLowerCase().split(/\s+/).filter(w => w.length > 2)
   const matched = allProducts.filter(p => {
-    const txt = `${p.name} ${p.description} ${p.categoryRel?.name || p.category}`.toLowerCase()
+    const txt = `${p.name} ${p.description} ${p.category}`.toLowerCase()
     return keywords.some(k => txt.includes(k))
   })
 
   const productList = allProducts.map(p =>
-    `[ID ${p.id}] ${p.name} (R$ ${p.price.toFixed(2).replace('.', ',')}) — ${p.description?.slice(0, 80)}. Categoria: ${p.categoryRel?.name || p.category}.`
+    `[ID ${p.id}] ${p.name} (R$ ${p.price.toFixed(2).replace('.', ',')}) — ${p.description?.slice(0, 80)}. Categoria: ${p.category}.`
   ).join('\n')
 
   const systemPrompt = `Voc\u00ea \u00e9 o assistente virtual da StreamCartoon, uma loja de assinaturas e contas digitais. Seja breve, simp\u00e1tico e \u00fatil.

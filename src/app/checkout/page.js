@@ -290,7 +290,7 @@ function CheckoutForm() {
                 {items.map((item) => (
                   <div key={item.productId} className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-dark-100 to-dark-950 flex items-center justify-center text-lg flex-shrink-0">
-                      {item.product.categoryRel?.icon || item.product.category?.split(' ')[0] || '📦'}
+                      {item.product.category?.split(' ')[0] || '📦'}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-white truncate">{item.product.name}</p>

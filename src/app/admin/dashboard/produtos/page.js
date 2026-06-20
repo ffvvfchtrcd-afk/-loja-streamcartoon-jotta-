@@ -37,28 +37,26 @@ export default function AdminProdutos() {
 
 
   const categories = categoriesResult?.categories || []
-  const defaultCatId = categories.length > 0 ? categories[0].id : null
+  const defaultCategory = categories.length > 0 ? categories[0].name : ''
 
   const [form, setForm] = useState({
-    name: '', description: '', price: '', categoryId: defaultCatId, category: '', active: true, deliveryType: 'auto', images: [],
+    name: '', description: '', price: '', category: defaultCategory, active: true, deliveryType: 'auto', images: [],
   })
 
   const openCreate = () => {
     setEditing(null)
-    setForm({ name: '', description: '', price: '', categoryId: defaultCatId, category: '', active: true, deliveryType: 'auto', images: [] })
+    setForm({ name: '', description: '', price: '', category: defaultCategory, active: true, deliveryType: 'auto', images: [] })
     setPendingImages([])
     setStep(1)
     setShowModal(true)
   }
 
   const openEdit = (product) => {
-    const catId = product.categoryId || categories.find(c => c.name === product.category)?.id || null
     setEditing(product)
     setForm({
       name: product.name,
       description: product.description,
       price: product.price.toString(),
-      categoryId: catId,
       category: product.category || '',
       active: product.active,
       deliveryType: product.deliveryType || 'auto',
@@ -130,13 +128,8 @@ export default function AdminProdutos() {
     }
 
     const data = {
-      name: form.name,
-      description: form.description,
+      ...form,
       price: parseFloat(form.price),
-      categoryId: form.categoryId || null,
-      category: form.category,
-      active: form.active,
-      deliveryType: form.deliveryType,
       images: uploadedUrls,
     }
 
@@ -184,7 +177,7 @@ export default function AdminProdutos() {
   const canNext = () => {
     if (step === 1) return form.name && form.price && form.description
     if (step === 2) return true
-    if (step === 3) return form.categoryId
+    if (step === 3) return form.category
     return true
   }
 
@@ -352,18 +345,17 @@ export default function AdminProdutos() {
                 <Link href="/admin/dashboard/categorias" className="text-green-neon hover:underline text-xs ml-2">(Gerenciar)</Link>
               </label>
               <div className="flex gap-2">
-                <select className="input-cartoon flex-1" value={form.categoryId || ''} onChange={e => {
-                  const id = e.target.value ? Number(e.target.value) : null
-                  const cat = categories.find(c => c.id === id)
-                  setForm({ ...form, categoryId: id, category: cat?.name || '' }
-                )}}>
+                <select className="input-cartoon flex-1" value={form.category} onChange={e => {
+                  const cat = categories.find(c => c.name === e.target.value)
+                  setForm({ ...form, category: cat?.name || e.target.value })
+                }}>
                   {categories.length === 0 ? (
                     <option value="">Nenhuma categoria. Crie uma em Categorias</option>
                   ) : (
                     <>
                       <option value="">Selecione uma categoria</option>
                       {categories.filter(c => c.active).map(cat => (
-                        <option key={cat.id} value={cat.id}>
+                        <option key={cat.id} value={cat.name}>
                           {cat.icon} {cat.name}
                         </option>
                       ))}
@@ -383,7 +375,7 @@ export default function AdminProdutos() {
                       if (res.ok) {
                         const data = await res.json()
                         const match = categories.find(c => c.name.toLowerCase().includes(data.category.toLowerCase()))
-                        if (match) setForm(prev => ({ ...prev, categoryId: match.id, category: match.name }))
+                        if (match) setForm(prev => ({ ...prev, category: match.name }))
                       }
                     }}
                     className="px-3 py-2 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors text-xs whitespace-nowrap"
@@ -453,7 +445,7 @@ export default function AdminProdutos() {
                 </div>
                   <div className="flex-1">
                     <span className="text-xs text-gray-500">Categoria</span>
-                    <p className="text-white">{form.categoryId ? `${categories.find(c => c.id === form.categoryId)?.icon || ''} ${form.category}` : form.category || 'Sem categoria'}</p>
+                    <p className="text-white">{form.category || 'Sem categoria'}</p>
                   </div>
               </div>
               <div>
@@ -505,20 +497,20 @@ export default function AdminProdutos() {
               setCleaning(true)
               try {
                 const token = localStorage.getItem('token')
-                const res = await fetch('/api/admin/migrate-categories', {
+                const res = await fetch('/api/admin/cleanup-categories', {
                   method: 'POST',
                   headers: { Authorization: `Bearer ${token}` },
                 })
                 const data = await res.json()
                 showToast(data.message || 'Feito!', res.ok ? 'success' : 'error')
                 if (res.ok) mutate('/api/products')
-              } catch { showToast('Erro ao migrar', 'error') }
+              } catch { showToast('Erro ao limpar', 'error') }
               setCleaning(false)
             }}
             disabled={cleaning}
             className="btn-cartoon-outline text-sm gap-2"
           >
-            {cleaning ? 'Migrando...' : '🔗 Migrar Categorias'}
+            {cleaning ? 'Limpando...' : '🧹 Limpar Categorias'}
           </button>
         </div>
       </div>
@@ -563,7 +555,7 @@ export default function AdminProdutos() {
                   <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-2xl">
-                    {product.categoryRel?.icon || product.category?.split(' ')[0] || '📦'}
+                    📦
                   </div>
                 )}
               </div>
@@ -586,7 +578,7 @@ export default function AdminProdutos() {
               <div className="text-right">
                 <p className="text-green-neon font-bold">R$ {product.price.toFixed(2)}</p>
                 {product.category ? (
-                  <p className="text-xs text-gray-500">{product.categoryRel ? `${product.categoryRel.icon} ` : ''}{product.category}</p>
+                  <p className="text-xs text-gray-500">{product.category}</p>
                 ) : (
                   <p className="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded inline-block">⚠️ SEM CATEGORIA</p>
                 )}

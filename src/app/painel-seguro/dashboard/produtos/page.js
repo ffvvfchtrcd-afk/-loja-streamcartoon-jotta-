@@ -22,15 +22,15 @@ export default function AdminProdutos() {
   const { toast, showToast, closeToast } = useToast()
 
   const categories = categoriesResult?.categories || []
-  const defaultCatId = categories.length > 0 ? categories[0].id : null
+  const defaultCategory = categories.length > 0 ? categories[0].name : ''
 
   const [form, setForm] = useState({
-    name: '', description: '', price: '', categoryId: defaultCatId, category: '', active: true, deliveryType: 'auto',
+    name: '', description: '', price: '', category: defaultCategory, active: true, deliveryType: 'auto',
   })
 
   const openCreate = () => {
     setEditing(null)
-    setForm({ name: '', description: '', price: '', categoryId: defaultCatId, category: '', active: true, deliveryType: 'auto' })
+    setForm({ name: '', description: '', price: '', category: defaultCategory, active: true, deliveryType: 'auto' })
     setShowModal(true)
   }
 
@@ -40,7 +40,6 @@ export default function AdminProdutos() {
       name: product.name,
       description: product.description,
       price: product.price.toString(),
-      categoryId: product.categoryId || null,
       category: product.category || '',
       active: product.active,
       deliveryType: product.deliveryType || 'auto',
@@ -157,7 +156,7 @@ export default function AdminProdutos() {
           {(products || []).map(product => (
             <div key={product.id} className="card-cartoon flex items-center gap-4 p-4 animate-slide-up">
               <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-dark-100 to-dark-950 flex items-center justify-center text-2xl flex-shrink-0">
-                {product.categoryRel?.icon || product.category?.split(' ')[0] || '📦'}
+                {product.category?.split(' ')[0] || '📦'}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
@@ -174,7 +173,7 @@ export default function AdminProdutos() {
               </div>
               <div className="text-right">
                 <p className="text-green-neon font-bold">R$ {product.price.toFixed(2)}</p>
-                <p className="text-xs text-gray-500">{product.categoryRel?.icon} {product.category}</p>
+                <p className="text-xs text-gray-500">{product.category}</p>
               </div>
               <div className="flex gap-2">
                 <button onClick={() => openEdit(product)} className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors">
@@ -213,10 +212,9 @@ export default function AdminProdutos() {
                   <label className="block text-sm text-gray-400 mb-1">
                     Categoria <Link href="/admin/dashboard/categorias" className="text-green-neon hover:underline text-xs ml-1">(Gerenciar)</Link>
                   </label>
-                  <select className="input-cartoon" value={form.categoryId || ''} onChange={e => {
-                    const id = e.target.value ? Number(e.target.value) : null
-                    const cat = categories.find(c => c.id === id)
-                    setForm({ ...form, categoryId: id, category: cat?.name || '' })
+                  <select className="input-cartoon" value={form.category} onChange={e => {
+                    const cat = categories.find(c => c.name === e.target.value)
+                    setForm({ ...form, category: cat?.name || e.target.value })
                   }}>
                     {categories.length === 0 ? (
                       <option value="">Nenhuma categoria. Crie uma em Categorias</option>
@@ -224,7 +222,7 @@ export default function AdminProdutos() {
                       <>
                         <option value="">Selecione uma categoria</option>
                         {categories.filter(c => c.active).map(cat => (
-                          <option key={cat.id} value={cat.id}>
+                          <option key={cat.id} value={cat.name}>
                             {cat.icon} {cat.name}
                           </option>
                         ))}

@@ -171,7 +171,7 @@ function CartContent() {
                   <div key={item.productId} className="card-cartoon p-5 flex items-start gap-4 animate-slide-up group">
                     {/* Product Icon */}
                     <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-dark-100 to-dark-950 flex items-center justify-center text-3xl flex-shrink-0">
-                      {item.product.categoryRel?.icon || item.product.category?.split(' ')[0] || '📦'}
+                      {item.product.category?.split(' ')[0] || '📦'}
                     </div>
 
                     {/* Product Info */}

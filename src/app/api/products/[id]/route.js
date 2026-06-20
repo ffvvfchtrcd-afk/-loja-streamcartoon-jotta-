@@ -14,18 +14,10 @@ export async function PUT(request, { params }) {
   const data = await request.json()
   const { images, categoryId, ...productData } = data
 
-  let catName = productData.category || ''
-  if (categoryId) {
-    const cat = await prisma.category.findUnique({ where: { id: categoryId } })
-    if (cat) catName = cat.name
-  }
-
   const product = await prisma.product.update({
     where: { id },
     data: {
       ...productData,
-      category: catName,
-      categoryId: categoryId || null,
       images: {
         deleteMany: {},
         create: images?.length
@@ -33,7 +25,7 @@ export async function PUT(request, { params }) {
           : undefined,
       },
     },
-    include: { images: { orderBy: { order: 'asc' } }, categoryRel: true },
+    include: { images: { orderBy: { order: 'asc' } } },
   })
   await logActivity(admin.id, admin.username, 'product_update', `Atualizou produto: ${product.name}`)
   return NextResponse.json(product)
@@ -68,7 +60,6 @@ export async function GET(request, { params }) {
     where: { id },
     include: {
       images: { orderBy: { order: 'asc' } },
-      categoryRel: true,
       reviews: {
         include: { user: { select: { id: true, username: true } } },
         orderBy: { createdAt: 'desc' },
