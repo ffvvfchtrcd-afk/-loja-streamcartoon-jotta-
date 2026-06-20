@@ -483,7 +483,7 @@ export default function AdminProdutos() {
   }
 
   return (
-    <div>
+    <div className="overflow-x-hidden">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="title-cartoon text-3xl text-white mb-1">Produtos</h2>
@@ -550,7 +550,7 @@ export default function AdminProdutos() {
       ) : (
         <div className="grid gap-4">
           {products.map(product => (
-              <div key={product.id} className={`card-cartoon flex items-center gap-4 p-4 animate-slide-up ${!product.category ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}>
+              <div key={product.id} className={`card-cartoon flex flex-col md:flex-row items-start md:items-center gap-4 p-4 animate-slide-up ${!product.category ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}>
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-dark-100 to-dark-950 flex-shrink-0">
                 {product.images?.length > 0 ? (
                   <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover" />

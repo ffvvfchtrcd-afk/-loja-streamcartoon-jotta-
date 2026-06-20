@@ -29,7 +29,7 @@ export default function AdminDashboardLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-dark-900">
       <AdminSidebar />
-      <main className="flex-1 overflow-auto p-4 md:p-6 bg-dark-900 pb-24 md:pb-6">
+      <main className="flex-1 overflow-x-hidden p-4 md:p-6 bg-dark-900 pb-24 md:pb-6">
         <div className="max-w-6xl mx-auto">
           {children}
         </div>
