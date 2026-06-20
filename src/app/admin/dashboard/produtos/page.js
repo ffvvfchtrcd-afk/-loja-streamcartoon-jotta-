@@ -451,7 +451,7 @@ export default function AdminProdutos() {
               </div>
               <div>
                 <span className="text-xs text-gray-500">Descrição</span>
-                <p className="text-gray-300 text-sm">{form.description}</p>
+                <p className="text-gray-300 text-sm line-clamp-3">{form.description}</p>
               </div>
               <div>
                 <span className="text-xs text-gray-500">Tipo de Entrega</span>
@@ -599,7 +599,7 @@ export default function AdminProdutos() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setShowModal(false)}>
-          <div className="card-cartoon w-full max-w-lg p-8 animate-bounce-in" onClick={e => e.stopPropagation()}>
+          <div className="card-cartoon w-full max-w-lg p-8 animate-bounce-in max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             {/* Steps Indicator */}
             <div className="flex justify-center gap-2 mb-8">
               {steps.map(s => (
