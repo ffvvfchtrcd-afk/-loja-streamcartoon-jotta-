@@ -208,6 +208,7 @@ model BancaConfig {
   maxGales    Int      @default(2)
   galeMultiplier1 Float @default(2.0)
   galeMultiplier2 Float @default(4.0)
+  galeMultiplier3 Float @default(8.0)
   metaManha   Float    @default(0)
   metaTarde   Float    @default(0)
   metaNoite   Float    @default(0)

@@ -84,7 +84,7 @@ export default function V2Config() {
           {/* Estratégia */}
           <div className="card-cartoon p-5">
             <h3 className="text-white font-medium mb-4">📈 Estratégia</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Payout (%)</label>
                 <input name="payout" defaultValue={config.payout * 100} step="1" type="number" className="input-cartoon text-sm" placeholder="80" />
@@ -95,17 +95,25 @@ export default function V2Config() {
                   <option value="0">0 (sem gales)</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
+                  <option value="3">3</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Multiplicador G1</label>
+                <label className="block text-xs text-gray-400 mb-1">Mult. G1</label>
                 <input name="galeMultiplier1" defaultValue={config.galeMultiplier1} step="0.1" type="number" className="input-cartoon text-sm" />
-                <p className="text-[10px] text-gray-500 mt-0.5">Recomendado: 2x (entrada × 2)</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">2x (entrada × 2)</p>
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Multiplicador G2</label>
+                <label className="block text-xs text-gray-400 mb-1">Mult. G2</label>
                 <input name="galeMultiplier2" defaultValue={config.galeMultiplier2} step="0.1" type="number" className="input-cartoon text-sm" />
-                <p className="text-[10px] text-gray-500 mt-0.5">Recomendado: 4x (entrada × 4)</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">4x (entrada × 4)</p>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Mult. G3</label>
+                <input name="galeMultiplier3" defaultValue={config.galeMultiplier3} step="0.1" type="number" className="input-cartoon text-sm" />
+                <p className="text-[10px] text-gray-500 mt-0.5">8x (entrada × 8)</p>
+              </div>
+            </div>
               </div>
             </div>
           </div>

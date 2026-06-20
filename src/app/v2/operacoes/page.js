@@ -10,14 +10,17 @@ function formatMoney(v) {
   return `R$ ${(v || 0).toFixed(2)}`
 }
 
-function calcGaleEntries(entrada, payout, g1, g2, gales) {
+function calcGaleEntries(entrada, payout, g1, g2, g3, gales) {
   const g1Entry = entrada * g1
   const g2Entry = entrada * g2
+  const g3Entry = entrada * g3
   const results = {}
   results.win_direct = entrada * payout
   results.win_g1 = g1Entry * payout - entrada
   results.win_g2 = g2Entry * payout - entrada - g1Entry
-  if (gales >= 2) results.loss = -(entrada + g1Entry + g2Entry)
+  results.win_g3 = g3Entry * payout - entrada - g1Entry - g2Entry
+  if (gales >= 3) results.loss = -(entrada + g1Entry + g2Entry + g3Entry)
+  else if (gales >= 2) results.loss = -(entrada + g1Entry + g2Entry)
   else if (gales === 1) results.loss = -(entrada + g1Entry)
   else results.loss = -entrada
   return results
@@ -59,7 +62,7 @@ export default function V2Operacoes() {
 
   const galeCalc = useMemo(() => {
     if (!config) return null
-    return calcGaleEntries(entradaField, payoutField / 100, config.galeMultiplier1, config.galeMultiplier2, config.maxGales)
+    return calcGaleEntries(entradaField, payoutField / 100, config.galeMultiplier1, config.galeMultiplier2, config.galeMultiplier3, config.maxGales)
   }, [config, entradaField, payoutField])
 
   const hojeLucro = hojeOps.reduce((s, o) => s + o.resultado, 0)
@@ -93,7 +96,7 @@ export default function V2Operacoes() {
       body: JSON.stringify({ tipo, periodo, entrada: entradaField, payout: payoutField / 100 }),
     })
     if (res.ok) {
-      const nomes = { win_direct: 'Win Direto ✅', win_g1: 'Win G1 🟡', win_g2: 'Win G2 🟠', loss: 'Loss ❌' }
+      const nomes = { win_direct: 'Win Direto ✅', win_g1: 'Win G1 🟡', win_g2: 'Win G2 🟠', win_g3: 'Win G3 🟣', loss: 'Loss ❌' }
       showToast(`${nomes[tipo]} registrado!`, 'success')
       mutateConfig(); mutateOps()
     } else {
@@ -141,7 +144,7 @@ export default function V2Operacoes() {
       {/* Botões */}
       <div className="card-cartoon p-6">
         <h3 className="text-white font-medium mb-4">Registrar Operação</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <button onClick={() => handleOperacao('win_direct')}
             className="btn-cartoon bg-green-500/10 text-green-400 border-green-500/30 hover:bg-green-500/20 text-sm py-5">
             ✅ Win Direto
@@ -156,6 +159,11 @@ export default function V2Operacoes() {
             className="btn-cartoon bg-orange-500/10 text-orange-400 border-orange-500/30 hover:bg-orange-500/20 text-sm py-5">
             🟠 Win G2
             {galeCalc && <span className="block text-[10px] opacity-70 font-normal mt-0.5">{formatMoney(galeCalc.win_g2)}</span>}
+          </button>
+          <button onClick={() => handleOperacao('win_g3')}
+            className="btn-cartoon bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20 text-sm py-5">
+            🟣 Win G3
+            {galeCalc && <span className="block text-[10px] opacity-70 font-normal mt-0.5">{formatMoney(galeCalc.win_g3)}</span>}
           </button>
           <button onClick={() => handleOperacao('loss')}
             className="btn-cartoon bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20 text-sm py-5">
@@ -205,7 +213,7 @@ export default function V2Operacoes() {
             {[...hojeOps].reverse().map(op => (
               <div key={op.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-dark-50 text-sm">
                 <div className="flex items-center gap-2">
-                  <span>{op.tipo === 'win_direct' ? '✅' : op.tipo === 'win_g1' ? '🟡' : op.tipo === 'win_g2' ? '🟠' : '❌'}</span>
+                  <span>{op.tipo === 'win_direct' ? '✅' : op.tipo === 'win_g1' ? '🟡' : op.tipo === 'win_g2' ? '🟠' : op.tipo === 'win_g3' ? '🟣' : '❌'}</span>
                   <span className="text-xs text-gray-500">{PERIODOS.find(p => p.key === op.periodo)?.label}</span>
                   <span className="text-xs text-gray-400">{new Date(op.createdAt).toLocaleTimeString()}</span>
                   {op.payoutUsado > 0 && <span className="text-[10px] text-gray-500">{(op.payoutUsado * 100).toFixed(0)}%</span>}
