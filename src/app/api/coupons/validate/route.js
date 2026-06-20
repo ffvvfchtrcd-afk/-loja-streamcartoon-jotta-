@@ -13,7 +13,7 @@ export async function POST(request) {
   if (!code) return NextResponse.json({ error: 'CÃ³digo Ã© obrigatÃ³rio' }, { status: 400 })
 
   const coupon = await prisma.coupon.findUnique({ where: { code: code.toUpperCase() } })
-  if (!coupon) return NextResponse.json({ error: 'Cupom nÃ£o encontrado' }, { status: 404 })
+  if (!coupon) return NextResponse.json({ error: 'Cupom Não encontrado' }, { status: 404 })
   if (!coupon.active) return NextResponse.json({ error: 'Cupom inativo' }, { status: 400 })
   if (coupon.maxUses > 0 && coupon.usedCount >= coupon.maxUses) {
     return NextResponse.json({ error: 'Cupom esgotado' }, { status: 400 })

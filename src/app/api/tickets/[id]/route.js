@@ -9,7 +9,7 @@ import { getAdminFromRequest, getUserFromRequest } from '@/lib/auth'
 export async function GET(request, { params }) {
   const admin = getAdminFromRequest(request)
   const user = getUserFromRequest(request)
-  if (!admin && !user) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin && !user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const id = Number(params.id)
   const ticket = await prisma.ticket.findUnique({
@@ -23,14 +23,14 @@ export async function GET(request, { params }) {
   })
 
   if (!ticket) return NextResponse.json({ error: 'Ticket nÃ£o encontrado' }, { status: 404 })
-  if (!admin && ticket.userId !== user?.id) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin && ticket.userId !== user?.id) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   return NextResponse.json(ticket)
 }
 
 export async function PATCH(request, { params }) {
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const { status, action } = await request.json()
   const id = Number(params.id)

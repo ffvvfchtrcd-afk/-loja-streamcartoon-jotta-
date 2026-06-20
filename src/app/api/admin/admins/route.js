@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs'
 
 export async function GET(request) {
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   if (admin.role !== 'superadmin') return NextResponse.json({ error: 'Apenas superadmin' }, { status: 403 })
 
   const admins = await prisma.admin.findMany({
@@ -21,7 +21,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   if (admin.role !== 'superadmin') return NextResponse.json({ error: 'Apenas superadmin' }, { status: 403 })
 
   const { username, password, role } = await request.json()
@@ -44,11 +44,11 @@ export async function POST(request) {
 
 export async function DELETE(request) {
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   if (admin.role !== 'superadmin') return NextResponse.json({ error: 'Apenas superadmin' }, { status: 403 })
 
   const { id } = await request.json()
-  if (id === admin.id) return NextResponse.json({ error: 'NÃ£o pode remover a si mesmo' }, { status: 400 })
+  if (id === admin.id) return NextResponse.json({ error: 'Não pode remover a si mesmo' }, { status: 400 })
 
   await prisma.admin.delete({ where: { id } })
   return NextResponse.json({ success: true })

@@ -27,7 +27,7 @@ export async function GET(request) {
     return NextResponse.json(orders)
   }
 
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const where = status ? { status } : {}
   const orders = await prisma.order.findMany({
@@ -63,7 +63,7 @@ export async function POST(request) {
     })
 
     if (products.length !== items.length) {
-      return NextResponse.json({ error: 'Um ou mais produtos nÃ£o encontrados' }, { status: 404 })
+      return NextResponse.json({ error: 'Um ou mais produtos Não encontrados' }, { status: 404 })
     }
 
     const productMap = Object.fromEntries(products.map(p => [p.id, p]))
@@ -99,7 +99,7 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Cupom expirado' }, { status: 400 })
       }
       if (subtotal < coupon.minPurchase) {
-        return NextResponse.json({ error: 'Valor mÃ­nimo do cupom nÃ£o atingido' }, { status: 400 })
+        return NextResponse.json({ error: 'Valor mÃ­nimo do cupom Não atingido' }, { status: 400 })
       }
 
       if (coupon.discountType === 'percentage') {

@@ -8,7 +8,7 @@ import { logActivity } from '@/lib/activity'
 
 export async function POST(request) {
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const { productId, values } = await request.json()
   if (!productId || !values || !values.length) {
@@ -16,7 +16,7 @@ export async function POST(request) {
   }
 
   const product = await prisma.product.findUnique({ where: { id: Number(productId) } })
-  if (!product) return NextResponse.json({ error: 'Produto nÃ£o encontrado' }, { status: 404 })
+  if (!product) return NextResponse.json({ error: 'Produto Não encontrado' }, { status: 404 })
 
   const created = []
   for (const value of values) {

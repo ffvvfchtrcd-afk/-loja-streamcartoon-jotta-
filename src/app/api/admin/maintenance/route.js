@@ -11,7 +11,7 @@ export async function GET() {
 
 export async function PUT(request) {
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const { enabled } = await request.json()
   await prisma.setting.upsert({

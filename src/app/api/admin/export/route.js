@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma'
 export async function GET(request) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const type = searchParams.get('type') || 'orders'

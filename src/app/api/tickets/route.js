@@ -8,7 +8,7 @@ import { getAdminFromRequest, getUserFromRequest } from '@/lib/auth'
 export async function GET(request) {
   const admin = getAdminFromRequest(request)
   const user = getUserFromRequest(request)
-  if (!admin && !user) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin && !user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const mine = searchParams.get('mine')
@@ -20,7 +20,7 @@ export async function GET(request) {
   if (mine && user) {
     where = { userId: user.id }
   } else if (!admin) {
-    return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
   if (type) where = { ...where, type }

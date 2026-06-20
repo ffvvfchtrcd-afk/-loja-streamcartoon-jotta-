@@ -7,7 +7,7 @@ import { getAdminFromRequest } from '@/lib/auth'
 
 export async function GET(request) {
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const [pendingOrders, openTickets, deliveryTickets, totalUsers, products] = await Promise.all([
     prisma.order.count({ where: { status: 'pending' } }),

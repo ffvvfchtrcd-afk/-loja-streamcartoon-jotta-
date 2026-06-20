@@ -8,7 +8,7 @@ import { getUserFromRequest } from '@/lib/auth'
 
 export async function POST(request) {
   const user = getUserFromRequest(request)
-  if (!user) return NextResponse.json({ error: 'NÃ£o autenticado' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
 
   const { currentPassword, newPassword } = await request.json()
 
@@ -21,7 +21,7 @@ export async function POST(request) {
   }
 
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
-  if (!dbUser) return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o encontrado' }, { status: 404 })
+  if (!dbUser) return NextResponse.json({ error: 'UsuÃ¡rio Não encontrado' }, { status: 404 })
 
   const valid = await bcrypt.compare(currentPassword, dbUser.password)
   if (!valid) return NextResponse.json({ error: 'Senha atual incorreta' }, { status: 400 })

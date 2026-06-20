@@ -8,7 +8,7 @@ import { logActivity } from '@/lib/activity'
 export async function GET(request) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const settings = await prisma.setting.findMany()
   const map = Object.fromEntries(settings.map(s => [s.key, s.value]))
@@ -19,7 +19,7 @@ export async function GET(request) {
 export async function POST(request) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const data = await request.json()
 

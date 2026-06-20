@@ -8,7 +8,7 @@ import { logActivity } from '@/lib/activity'
 export async function PUT(request, { params }) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const id = Number(params.id)
   const data = await request.json()
@@ -34,14 +34,18 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const id = Number(params.id)
   const product = await prisma.product.findUnique({ where: { id } })
   if (!product) return NextResponse.json({ error: 'Produto nÃ£o encontrado' }, { status: 404 })
-  await prisma.product.delete({ where: { id } })
-  await logActivity(admin.id, admin.username, 'product_delete', `Removeu produto: ${product.name}`)
-  return NextResponse.json({ success: true })
+
+  await prisma.product.update({
+    where: { id },
+    data: { active: false },
+  })
+  await logActivity(admin.id, admin.username, 'product_delete', `Desativou produto: ${product.name}`)
+  return NextResponse.json({ success: true, message: 'Produto desativado' })
 }
 
 export async function GET(request, { params }) {

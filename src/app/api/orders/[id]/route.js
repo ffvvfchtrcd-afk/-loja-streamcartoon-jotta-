@@ -23,7 +23,7 @@ export async function GET(request, { params }) {
   if (!order) return NextResponse.json({ error: 'Pedido nÃ£o encontrado' }, { status: 404 })
 
   if (!admin && user && order.userId && order.userId !== user.id) {
-    return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
   const ticket = order.tickets?.[0] || null
@@ -35,7 +35,7 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const { status } = await request.json()
   const id = Number(params.id)

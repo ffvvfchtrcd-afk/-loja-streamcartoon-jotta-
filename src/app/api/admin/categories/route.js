@@ -9,7 +9,7 @@ export async function GET(request) {
   try {
     const admin = getAdminFromRequest(request)
     if (!admin) {
-      return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
     const categories = await prisma.category.findMany({
@@ -27,7 +27,7 @@ export async function POST(request) {
   try {
     const admin = getAdminFromRequest(request)
     if (!admin) {
-      return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -62,7 +62,7 @@ export async function PUT(request) {
   try {
     const admin = getAdminFromRequest(request)
     if (!admin) {
-      return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -91,7 +91,7 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'JÃ¡ existe uma categoria com este nome' }, { status: 409 })
     }
     if (error.code === 'P2025') {
-      return NextResponse.json({ error: 'Categoria nÃ£o encontrada' }, { status: 404 })
+      return NextResponse.json({ error: 'Categoria Não encontrada' }, { status: 404 })
     }
     console.error('PUT /api/admin/categories error:', error)
     return NextResponse.json({ error: 'Erro ao atualizar categoria' }, { status: 500 })
@@ -102,7 +102,7 @@ export async function DELETE(request) {
   try {
     const admin = getAdminFromRequest(request)
     if (!admin) {
-      return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -121,7 +121,7 @@ export async function DELETE(request) {
     return NextResponse.json({ message: 'Categoria removida com sucesso' })
   } catch (error) {
     if (error.code === 'P2025') {
-      return NextResponse.json({ error: 'Categoria nÃ£o encontrada' }, { status: 404 })
+      return NextResponse.json({ error: 'Categoria Não encontrada' }, { status: 404 })
     }
     console.error('DELETE /api/admin/categories error:', error)
     return NextResponse.json({ error: 'Erro ao remover categoria' }, { status: 500 })

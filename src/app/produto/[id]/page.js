@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import useSWR, { mutate } from 'swr'
 import { fetcher } from '@/lib/fetcher'
 import { useParams, useRouter } from 'next/navigation'
@@ -77,6 +77,61 @@ export default function ProductPage() {
     } catch {}
     setTogglingWishlist(false)
   }
+
+  const reviewsContainerRef = useRef(null)
+  const [scrollIndex, setScrollIndex] = useState(0)
+  const dragState = useRef({ isDragging: false, startX: 0, scrollLeft: 0 })
+
+  const handleDragStart = (e) => {
+    const el = reviewsContainerRef.current
+    if (!el) return
+    dragState.current.isDragging = true
+    dragState.current.startX = e.pageX - el.offsetLeft
+    dragState.current.scrollLeft = el.scrollLeft
+  }
+
+  const handleDragMove = (e) => {
+    if (!dragState.current.isDragging) return
+    e.preventDefault()
+    const el = reviewsContainerRef.current
+    if (!el) return
+    const x = e.pageX - el.offsetLeft
+    const walk = (x - dragState.current.startX) * 1.5
+    el.scrollLeft = dragState.current.scrollLeft - walk
+  }
+
+  const handleDragEnd = () => {
+    dragState.current.isDragging = false
+  }
+
+  const handleTouchStart = (e) => {
+    const el = reviewsContainerRef.current
+    if (!el) return
+    dragState.current.isDragging = true
+    dragState.current.startX = e.touches[0].pageX - el.offsetLeft
+    dragState.current.scrollLeft = el.scrollLeft
+  }
+
+  const handleTouchMove = (e) => {
+    if (!dragState.current.isDragging) return
+    const el = reviewsContainerRef.current
+    if (!el) return
+    const x = e.touches[0].pageX - el.offsetLeft
+    const walk = (x - dragState.current.startX) * 1.5
+    el.scrollLeft = dragState.current.scrollLeft - walk
+  }
+
+  useEffect(() => {
+    const el = reviewsContainerRef.current
+    if (!el || !product?.reviews?.length) return
+    const onScroll = () => {
+      const cardWidth = (el.children[0]?.offsetWidth || 300) + 16
+      const idx = Math.round(el.scrollLeft / cardWidth)
+      setScrollIndex(Math.min(idx, el.children.length - 1))
+    }
+    el.addEventListener('scroll', onScroll)
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [product?.reviews?.length])
 
   const [reviewRating, setReviewRating] = useState(5)
   const [reviewComment, setReviewComment] = useState('')
@@ -352,26 +407,52 @@ export default function ProductPage() {
           <h2 className="title-cartoon text-2xl text-white mb-6">📝 Avaliações ({product.reviewCount || 0})</h2>
 
           {product.reviews && product.reviews.length > 0 ? (
-            <div className="space-y-4">
-              {product.reviews.map((review, i) => (
-                <div key={i} className="card-cartoon animate-slide-up" style={{ animationDelay: `${i * 0.05}s` }}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-green-neon/20 border-2 border-green-neon/30 flex items-center justify-center text-green-neon font-bold">
-                        {review.user?.username?.charAt(0).toUpperCase() || '?'}
+            <div className="relative">
+              <div
+                ref={reviewsContainerRef}
+                onMouseDown={handleDragStart}
+                onMouseMove={handleDragMove}
+                onMouseUp={handleDragEnd}
+                onMouseLeave={handleDragEnd}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleDragEnd}
+                className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide cursor-grab active:cursor-grabbing pb-2"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {product.reviews.map((review, i) => (
+                  <div key={i} className="card-cartoon min-w-[280px] max-w-[320px] snap-start flex-shrink-0 animate-slide-up" style={{ animationDelay: `${i * 0.05}s` }}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-green-neon/20 border-2 border-green-neon/30 flex items-center justify-center text-green-neon font-bold flex-shrink-0">
+                          {review.user?.username?.charAt(0).toUpperCase() || '?'}
+                        </div>
+                        <div>
+                          <p className="text-white font-medium text-sm">{review.user?.username || 'Anônimo'}</p>
+                          <p className="text-xs text-gray-500">{new Date(review.createdAt).toLocaleDateString('pt-BR')}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-white font-medium">{review.user?.username || 'Anônimo'}</p>
-                        <p className="text-xs text-gray-500">{new Date(review.createdAt).toLocaleDateString('pt-BR')}</p>
-                      </div>
+                      <StarRating rating={review.rating} />
                     </div>
-                    <StarRating rating={review.rating} />
+                    {review.comment && (
+                      <p className="text-gray-400 text-sm leading-relaxed line-clamp-4">{review.comment}</p>
+                    )}
                   </div>
-                  {review.comment && (
-                    <p className="text-gray-400 text-sm leading-relaxed">{review.comment}</p>
-                  )}
+                ))}
+              </div>
+              {product.reviews.length > 2 && (
+                <div className="flex justify-center gap-1.5 mt-4">
+                  {product.reviews.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => reviewsContainerRef.current?.children[i]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        scrollIndex === i ? 'bg-green-neon w-4' : 'bg-dark-100 hover:bg-dark-200'
+                      }`}
+                    />
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           ) : (
             <div className="text-center py-12 card-cartoon">
