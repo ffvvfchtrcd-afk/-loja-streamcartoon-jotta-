@@ -234,54 +234,70 @@ function HomeContent() {
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-500">{total} produto(s) encontrado(s)</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filtered.map((product, index) => (
-                <div
-                  key={product.id}
-                  className="animate-slide-up"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <ProductCard product={product} />
+
+            {selectedCategory === 'Todas' ? (
+              <div className="space-y-8">
+                {allCategories.filter(c => c !== 'Todas').map(cat => {
+                  const catProducts = filtered.filter(p => p.category === cat)
+                  if (!catProducts.length) return null
+                  return (
+                    <div key={cat}>
+                      <div className="flex items-center gap-3 mb-3">
+                        <h3 className="font-cartoon text-lg text-white">{cat}</h3>
+                        <div className="flex-1 h-px bg-gradient-to-r from-green-neon/30 to-transparent" />
+                      </div>
+                      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                        {catProducts.map((product, i) => (
+                          <div key={product.id} className="min-w-[220px] max-w-[220px] snap-start flex-shrink-0 animate-slide-up" style={{ animationDelay: `${i * 0.05}s` }}>
+                            <ProductCard product={product} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+                {filtered.length === 0 && (
+                  <div className="text-center py-20">
+                    <span className="text-6xl">📭</span>
+                    <p className="text-gray-400 mt-4 text-lg">Nenhum produto encontrado</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filtered.map((product, index) => (
+                    <div
+                      key={product.id}
+                      className="animate-slide-up"
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      <ProductCard product={product} />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            {filtered.length === 0 && (
-              <div className="text-center py-20">
-                <span className="text-6xl">📭</span>
-                <p className="text-gray-400 mt-4 text-lg">Nenhum produto encontrado</p>
-              </div>
-            )}
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-10">
-                <button
-                  onClick={() => updateParams({ page: String(page - 1) })}
-                  disabled={page <= 1}
-                  className="p-2 rounded-xl bg-dark-50 border border-dark-100 text-gray-400 hover:text-white hover:border-green-neon/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  <HiChevronLeft className="text-lg" />
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                  <button
-                    key={p}
-                    onClick={() => updateParams({ page: String(p) })}
-                    className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
-                      page === p
-                        ? 'bg-green-neon text-dark-950'
-                        : 'bg-dark-50 text-gray-400 border border-dark-100 hover:border-green-neon/30 hover:text-white'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-                <button
-                  onClick={() => updateParams({ page: String(page + 1) })}
-                  disabled={page >= totalPages}
-                  className="p-2 rounded-xl bg-dark-50 border border-dark-100 text-gray-400 hover:text-white hover:border-green-neon/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  <HiChevronRight className="text-lg" />
-                </button>
-              </div>
+                {filtered.length === 0 && (
+                  <div className="text-center py-20">
+                    <span className="text-6xl">📭</span>
+                    <p className="text-gray-400 mt-4 text-lg">Nenhum produto encontrado</p>
+                  </div>
+                )}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-10">
+                    <button onClick={() => updateParams({ page: String(page - 1) })} disabled={page <= 1}
+                      className="p-2 rounded-xl bg-dark-50 border border-dark-100 text-gray-400 hover:text-white hover:border-green-neon/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    ><HiChevronLeft className="text-lg" /></button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                      <button key={p} onClick={() => updateParams({ page: String(p) })}
+                        className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${page === p ? 'bg-green-neon text-dark-950' : 'bg-dark-50 text-gray-400 border border-dark-100 hover:border-green-neon/30 hover:text-white'}`}
+                      >{p}</button>
+                    ))}
+                    <button onClick={() => updateParams({ page: String(page + 1) })} disabled={page >= totalPages}
+                      className="p-2 rounded-xl bg-dark-50 border border-dark-100 text-gray-400 hover:text-white hover:border-green-neon/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    ><HiChevronRight className="text-lg" /></button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
