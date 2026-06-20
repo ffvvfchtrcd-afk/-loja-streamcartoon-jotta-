@@ -40,11 +40,11 @@ function HomeContent() {
   const { data: result, isLoading } = useSWR(
     `/api/products?${apiParams.toString()}`
   )
-  const products = result?.products || []
+  const products = (result?.products || []).filter(Boolean)
   const totalPages = result?.totalPages || 1
   const total = result?.total || 0
 
-  const getCatName = (p) => p.category || ''
+  const getCatName = (p) => (p && p.category) || ''
 
   const allCategories = products.length > 0
     ? ['Todas', ...new Set(products.map(getCatName).filter(Boolean))]
