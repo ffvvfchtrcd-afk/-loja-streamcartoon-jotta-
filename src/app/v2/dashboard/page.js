@@ -11,12 +11,8 @@ function formatMoney(v) {
 
 function calcStats(all) {
   const total = all.length
-  const win_direct = all.filter(o => o.tipo === 'win_direct').length
-  const win_g1 = all.filter(o => o.tipo === 'win_g1').length
-  const win_g2 = all.filter(o => o.tipo === 'win_g2').length
-  const win_g3 = all.filter(o => o.tipo === 'win_g3').length
+  const wins = all.filter(o => o.tipo.startsWith('win')).length
   const loss = all.filter(o => o.tipo === 'loss').length
-  const wins = win_direct + win_g1 + win_g2 + win_g3
   const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0'
 
   const now = new Date()
@@ -28,9 +24,9 @@ function calcStats(all) {
   let maxWinStreak = 0, maxLossStreak = 0, curWin = 0, curLoss = 0
   for (const o of [...all].sort((a, b) => new Date(a.data || a.createdAt) - new Date(b.data || b.createdAt))) {
     if (o.tipo === 'loss') { curLoss++; curWin = 0; if (curLoss > maxLossStreak) maxLossStreak = curLoss }
-    else { curWin++; curLoss = 0; if (curWin > maxWinStreak) maxWinStreak = curWin }
+    else if (o.tipo.startsWith('win')) { curWin++; curLoss = 0; if (curWin > maxWinStreak) maxWinStreak = curWin }
   }
-  return { total, win_direct, win_g1, win_g2, win_g3, loss, winRate, lucroSemanal, lucroMensal, maxWinStreak, maxLossStreak }
+  return { total, wins, loss, winRate, lucroSemanal, lucroMensal, maxWinStreak, maxLossStreak }
 }
 
 function buildChart(all) {
@@ -123,8 +119,8 @@ export default function V2Dashboard() {
         </div>
         <div className="card-cartoon p-4 text-center">
           <p className="text-xs text-gray-400">Wins</p>
-          <p className="text-2xl font-bold text-green-400">{stats.win_direct + stats.win_g1 + stats.win_g2 + stats.win_g3}</p>
-          <p className="text-[10px] text-gray-500">{stats.win_direct}D / {stats.win_g1}G1 / {stats.win_g2}G2 / {stats.win_g3}G3</p>
+          <p className="text-2xl font-bold text-green-400">{stats.wins}</p>
+          <p className="text-[10px] text-gray-500">Total de wins</p>
         </div>
         <div className="card-cartoon p-4 text-center">
           <p className="text-xs text-gray-400">Losses</p>

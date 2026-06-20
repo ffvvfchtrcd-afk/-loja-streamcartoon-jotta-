@@ -34,7 +34,7 @@ export async function POST(request) {
     return NextResponse.json({ error: 'tipo e periodo são obrigatórios' }, { status: 400 })
   }
 
-  if (!['win_direct', 'win_g1', 'win_g2', 'win_g3', 'loss'].includes(tipo)) {
+  if (!['win', 'loss', 'win_direct', 'win_g1', 'win_g2', 'win_g3'].includes(tipo)) {
     return NextResponse.json({ error: 'tipo inválido' }, { status: 400 })
   }
   if (!['manha', 'tarde', 'noite'].includes(periodo)) {
