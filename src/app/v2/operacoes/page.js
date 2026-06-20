@@ -34,6 +34,8 @@ export default function V2Operacoes() {
   const { data: operacoes, mutate: mutateOps } = useSWR('/api/admin/banca/operacoes', adminFetcher)
   const ops = operacoes || []
   const hoje = new Date().toISOString().slice(0, 10)
+
+  const bancaAtual = config?.bancaAtual || 0
   const hojeOps = ops.filter(o => o.dia === hoje)
 
   const hojeLucro = hojeOps.reduce((s, o) => s + o.resultado, 0)
@@ -96,6 +98,13 @@ export default function V2Operacoes() {
         <select value={periodo} onChange={e => setPeriodo(e.target.value)} className="input-cartoon text-sm py-1.5 px-2 w-auto">
           {PERIODOS.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
         </select>
+      </div>
+
+      <div className="card-cartoon p-4 text-center bg-dark-950/80">
+        <p className="text-xs text-gray-400 mb-0.5">💰 Saldo atual</p>
+        <p className={`text-3xl font-cartoon ${bancaAtual >= 0 ? 'text-green-neon' : 'text-red-400'}`}>
+          {formatMoney(bancaAtual)}
+        </p>
       </div>
 
       {confirmando ? (
