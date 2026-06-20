@@ -22,17 +22,24 @@ export async function GET(request) {
 
   const where = admin ? {} : { active: true, category: { not: '' } }
 
+  const orClauses = []
+
   if (q) {
-    where.OR = [
+    orClauses.push(
       { name: { contains: q, mode: 'insensitive' } },
       { description: { contains: q, mode: 'insensitive' } },
       { category: { contains: q, mode: 'insensitive' } },
-    ]
+    )
   }
 
   if (category) {
-    where.category = category
+    orClauses.push(
+      { category },
+      { categoryRel: { name: category } },
+    )
   }
+
+  if (orClauses.length > 0) where.OR = orClauses
 
   if (minPrice || maxPrice) {
     where.price = {}
@@ -56,7 +63,7 @@ export async function GET(request) {
       orderBy,
       skip,
       take: limit,
-      include: { images: { orderBy: { order: 'asc' } } },
+      include: { images: { orderBy: { order: 'asc' } }, categoryRel: true },
     }),
   ])
 
@@ -93,11 +100,19 @@ export async function POST(request) {
   if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const data = await request.json()
-  const { images, ...productData } = data
+  const { images, categoryId, ...productData } = data
+
+  let catName = productData.category || ''
+  if (categoryId) {
+    const cat = await prisma.category.findUnique({ where: { id: categoryId } })
+    if (cat) catName = cat.name
+  }
 
   const product = await prisma.product.create({
     data: {
       ...productData,
+      category: catName,
+      categoryId: categoryId || null,
       images: images?.length ? {
         create: images.map((url, i) => ({
           url,
@@ -106,7 +121,7 @@ export async function POST(request) {
         })),
       } : undefined,
     },
-    include: { images: { orderBy: { order: 'asc' } } },
+    include: { images: { orderBy: { order: 'asc' } }, categoryRel: true },
   })
   await logActivity(admin.id, admin.username, 'product_create', `Criou produto: ${product.name}`)
   return NextResponse.json({ ...product, stock: product.deliveryType === 'auto' ? 0 : 999 })

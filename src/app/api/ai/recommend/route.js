@@ -23,7 +23,7 @@ export async function GET(request) {
 
   const text = await callAI(
     'Voc\u00ea \u00e9 um recomendador inteligente. Dado o produto atual e o cat\u00e1logo, retorne APENAS os IDs (separados por v\u00edrgula) dos 3 produtos que o cliente teria interesse em comprar junto.',
-    `Cliente est\u00e1 vendo: ${product.name} - ${product.category}\n\nCat\u00e1logo:\n${catalog}\n\nIDs dos 3 produtos recomendados (interesse de compra conjunta):`
+    `Cliente est\u00e1 vendo: ${product.name} - ${product.categoryRel?.name || product.category}\n\nCat\u00e1logo:\n${catalog}\n\nIDs dos 3 produtos recomendados (interesse de compra conjunta):`
   )
 
   const ids = text.match(/\d+/g)?.map(Number).filter(n => allProducts.some(p => p.id === n)).slice(0, 3) || []

@@ -24,6 +24,8 @@ model Product {
   description  String
   price        Float
   category     String        @default("")
+  categoryId   Int?
+  categoryRel  Category?     @relation(fields: [categoryId], references: [id])
   image        String        @default("/placeholder.svg")
   images       ProductImage[]
   active       Boolean       @default(true)
@@ -159,12 +161,13 @@ model WishlistItem {
 }
 
 model Category {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  icon      String   @default("📦")
-  active    Boolean  @default(true)
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  icon      String    @default("📦")
+  active    Boolean   @default(true)
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+  products  Product[]
 }
 
 model Coupon {

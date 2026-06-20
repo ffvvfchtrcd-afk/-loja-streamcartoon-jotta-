@@ -44,13 +44,15 @@ function HomeContent() {
   const totalPages = result?.totalPages || 1
   const total = result?.total || 0
 
+  const getCatName = (p) => p.categoryRel?.name || p.category || ''
+
   const allCategories = products.length > 0
-    ? ['Todas', ...new Set(products.map(p => p.category).filter(Boolean))]
+    ? ['Todas', ...new Set(products.map(getCatName).filter(Boolean))]
     : ['Todas']
 
   const filtered = selectedCategory === 'Todas'
     ? products
-    : products.filter(p => p.category === selectedCategory)
+    : products.filter(p => getCatName(p) === selectedCategory)
 
   const updateParams = (updates) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -238,7 +240,7 @@ function HomeContent() {
             {selectedCategory === 'Todas' ? (
               <div className="space-y-8">
                 {allCategories.filter(c => c !== 'Todas').map(cat => {
-                  const catProducts = filtered.filter(p => p.category === cat)
+                  const catProducts = filtered.filter(p => getCatName(p) === cat)
                   if (!catProducts.length) return null
                   return (
                     <div key={cat}>

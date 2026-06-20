@@ -12,12 +12,20 @@ export async function PUT(request, { params }) {
 
   const id = Number(params.id)
   const data = await request.json()
-  const { images, ...productData } = data
+  const { images, categoryId, ...productData } = data
+
+  let catName = productData.category || ''
+  if (categoryId) {
+    const cat = await prisma.category.findUnique({ where: { id: categoryId } })
+    if (cat) catName = cat.name
+  }
 
   const product = await prisma.product.update({
     where: { id },
     data: {
       ...productData,
+      category: catName,
+      categoryId: categoryId || null,
       images: {
         deleteMany: {},
         create: images?.length
@@ -25,7 +33,7 @@ export async function PUT(request, { params }) {
           : undefined,
       },
     },
-    include: { images: { orderBy: { order: 'asc' } } },
+    include: { images: { orderBy: { order: 'asc' } }, categoryRel: true },
   })
   await logActivity(admin.id, admin.username, 'product_update', `Atualizou produto: ${product.name}`)
   return NextResponse.json(product)
@@ -34,11 +42,11 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   const { getAdminFromRequest } = await import('@/lib/auth')
   const admin = getAdminFromRequest(request)
-  if (!admin) return NextResponse.json({ error: 'NÃ£o autorizado' }, { status: 401 })
+  if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const id = Number(params.id)
   const product = await prisma.product.findUnique({ where: { id } })
-  if (!product) return NextResponse.json({ error: 'Produto nÃ£o encontrado' }, { status: 404 })
+  if (!product) return NextResponse.json({ error: 'Produto não encontrado' }, { status: 404 })
 
   await prisma.$transaction([
     prisma.code.deleteMany({ where: { productId: id } }),
@@ -60,13 +68,14 @@ export async function GET(request, { params }) {
     where: { id },
     include: {
       images: { orderBy: { order: 'asc' } },
+      categoryRel: true,
       reviews: {
         include: { user: { select: { id: true, username: true } } },
         orderBy: { createdAt: 'desc' },
       },
     },
   })
-  if (!product) return NextResponse.json({ error: 'Produto nÃ£o encontrado' }, { status: 404 })
+  if (!product) return NextResponse.json({ error: 'Produto não encontrado' }, { status: 404 })
   if (product.deliveryType === 'auto') {
     const codes = await prisma.code.findMany({ where: { productId: id, used: false } })
     product.stock = codes.length
