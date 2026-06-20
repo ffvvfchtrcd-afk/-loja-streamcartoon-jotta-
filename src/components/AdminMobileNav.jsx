@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HiHome, HiCube, HiShoppingCart, HiKey, HiCog, HiTicket, HiUser, HiClock, HiShieldCheck, HiTag, HiOutlineSparkles, HiMenu, HiX } from 'react-icons/hi'
+import { HiHome, HiCube, HiShoppingCart, HiKey, HiCog, HiTicket, HiUser, HiClock, HiShieldCheck, HiTag, HiOutlineSparkles, HiMenu, HiX, HiCurrencyDollar } from 'react-icons/hi'
 
 const links = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: HiHome },
@@ -12,6 +12,7 @@ const links = [
   { href: '/admin/dashboard/usuarios', label: 'Usuários', icon: HiUser },
   { href: '/admin/dashboard/tickets', label: 'Tickets', icon: HiTicket },
   { href: '/admin/dashboard/codigos', label: 'Códigos', icon: HiKey },
+  { href: '/admin/dashboard/banca', label: 'Banca', icon: HiCurrencyDollar },
   { href: '/admin/dashboard/config', label: 'Config', icon: HiCog },
 ]
 

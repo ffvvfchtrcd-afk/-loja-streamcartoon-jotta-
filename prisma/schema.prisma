@@ -197,3 +197,31 @@ model Setting {
   key   String @unique
   value String
 }
+
+model BancaConfig {
+  id          Int      @id @default(autoincrement())
+  bancaAtual  Float    @default(0)
+  valorEntrada Float   @default(0)
+  payout      Float    @default(0.80)
+  metaDiaria  Float    @default(0)
+  stopLoss    Float    @default(0)
+  maxGales    Int      @default(2)
+  galeMultiplier1 Float @default(2.5)
+  galeMultiplier2 Float @default(6.0)
+  metaManha   Float    @default(0)
+  metaTarde   Float    @default(0)
+  metaNoite   Float    @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
+model BancaOperacao {
+  id          Int      @id @default(autoincrement())
+  data        DateTime @default(now())
+  dia         String   // YYYY-MM-DD
+  periodo     String   // manha, tarde, noite
+  tipo        String   // win_direct, win_g1, win_g2, loss
+  entrada     Float    // base entry value
+  resultado   Float    // profit/loss in reais
+  saldoPos    Float    // bankroll after operation
+  createdAt   DateTime @default(now())
+}
