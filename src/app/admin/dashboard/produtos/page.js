@@ -32,6 +32,7 @@ export default function AdminProdutos() {
   const [uploading, setUploading] = useState(false)
   const [urlInput, setUrlInput] = useState('')
   const [pendingImages, setPendingImages] = useState([])
+  const [cleaning, setCleaning] = useState(false)
   const fileInputRef = useRef(null)
 
 
@@ -131,21 +132,27 @@ export default function AdminProdutos() {
       price: parseFloat(form.price),
       images: uploadedUrls,
     }
+
     const url = editing ? `/api/products/${editing.id}` : '/api/products'
     const method = editing ? 'PUT' : 'POST'
 
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify(data),
-    })
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(data),
+      })
 
-    if (res.ok) {
-      showToast(editing ? 'Produto atualizado!' : 'Produto criado!', 'success')
-      setShowModal(false)
-      mutate('/api/products')
-    } else {
-      showToast('Erro ao salvar produto', 'error')
+      if (res.ok) {
+        showToast(editing ? `Produto atualizado! (Categoria: ${form.category})` : 'Produto criado!', 'success')
+        setShowModal(false)
+        mutate('/api/products')
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        showToast(errData.error || `Erro ao salvar (${res.status})`, 'error')
+      }
+    } catch (err) {
+      showToast('Erro de rede', 'error')
     }
   }
 
@@ -475,9 +482,31 @@ export default function AdminProdutos() {
           <h2 className="title-cartoon text-3xl text-white mb-1">Produtos</h2>
           <p className="text-gray-400 text-sm">Gerencie seu catálogo de produtos</p>
         </div>
-        <button onClick={openCreate} className="btn-cartoon text-sm gap-2">
-          <HiPlus className="text-lg" /> Novo Produto
-        </button>
+        <div className="flex gap-2">
+          <button onClick={openCreate} className="btn-cartoon text-sm gap-2">
+            <HiPlus className="text-lg" /> Novo Produto
+          </button>
+          <button
+            onClick={async () => {
+              setCleaning(true)
+              try {
+                const token = localStorage.getItem('token')
+                const res = await fetch('/api/admin/cleanup-categories', {
+                  method: 'POST',
+                  headers: { Authorization: `Bearer ${token}` },
+                })
+                const data = await res.json()
+                showToast(data.message || 'Feito!', res.ok ? 'success' : 'error')
+                if (res.ok) mutate('/api/products')
+              } catch { showToast('Erro ao limpar', 'error') }
+              setCleaning(false)
+            }}
+            disabled={cleaning}
+            className="btn-cartoon-outline text-sm gap-2"
+          >
+            {cleaning ? 'Limpando...' : '🧹 Limpar Categorias'}
+          </button>
+        </div>
       </div>
 
       {showGuide && (
