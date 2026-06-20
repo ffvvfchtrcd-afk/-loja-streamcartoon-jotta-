@@ -5,6 +5,7 @@ import MobileNav from '@/components/MobileNav'
 import PageWrapper from '@/components/PageWrapper'
 import Providers from '@/components/Providers'
 import MaintenanceGuard from '@/components/MaintenanceGuard'
+import ChatBot from '@/components/ChatBot'
 
 const bowlby = Bowlby_One_SC({
   weight: '400',
@@ -38,6 +39,7 @@ export default function RootLayout({ children }) {
               {children}
             </PageWrapper>
             <MobileNav />
+            <ChatBot />
           </MaintenanceGuard>
         </Providers>
       </body>

@@ -342,9 +342,29 @@ export default function AdminTickets() {
 
                   {sidebarTicket.status !== 'closed' && !sidebarTicket.deliveredAt && (
                     <button onClick={() => handleClose(sidebarTicket.id)}
-                      className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition-colors px-2.5 py-1.5 rounded-lg bg-red-500/10"
+                      className="flex items-center gap-1 text-xs transition-colors px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:text-red-300 disabled:opacity-50"
                     >
                       <HiX /> Fechar
+                    </button>
+                  )}
+
+                  {sidebarTicket?.messages?.length > 0 && (
+                    <button onClick={async () => {
+                      const msgs = sidebarTicket.messages
+                      const token = localStorage.getItem('token')
+                      const res = await fetch('/api/ai/ticket-summary', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ messages: msgs }),
+                      })
+                      if (res.ok) {
+                        const data = await res.json()
+                        showToast(data.summary, 'success')
+                      }
+                    }} className="flex items-center gap-1 text-xs transition-colors px-2.5 py-1.5 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20"
+                      title="Resumir ticket com IA"
+                    >
+                      ✨ Resumir
                     </button>
                   )}
                 </div>
@@ -407,6 +427,25 @@ export default function AdminTickets() {
                       onChange={e => setNewMsg(e.target.value)}
                       disabled={sending}
                     />
+                    <button type="button" onClick={async () => {
+                      const msgs = sidebarTicket?.messages || []
+                      if (!msgs.length) return
+                      const token = localStorage.getItem('token')
+                      const res = await fetch('/api/ai/suggest-reply', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ ticketSubject: sidebarTicket.subject, messages: msgs }),
+                      })
+                      if (res.ok) {
+                        const data = await res.json()
+                        setNewMsg(data.reply)
+                      }
+                    }} className="px-2.5 py-2 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors text-xs disabled:opacity-50"
+                      title="Sugerir resposta com IA"
+                      disabled={!sidebarTicket?.messages?.length}
+                    >
+                      ✨
+                    </button>
                     <button type="submit" disabled={sending || !newMsg.trim()}
                       className="btn-cartoon !px-4 disabled:opacity-50"
                     >

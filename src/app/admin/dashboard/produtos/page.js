@@ -33,6 +33,7 @@ export default function AdminProdutos() {
   const [urlInput, setUrlInput] = useState('')
   const [pendingImages, setPendingImages] = useState([])
   const fileInputRef = useRef(null)
+  const [showInactive, setShowInactive] = useState(true)
 
   const categories = categoriesResult?.categories || []
   const defaultCategory = categories.length > 0 ? categories[0].name : '🎬 Netflix'
@@ -156,7 +157,7 @@ export default function AdminProdutos() {
     })
 
     if (res.ok) {
-      showToast('Produto removido!', 'success')
+      showToast('Produto desativado!', 'success')
       mutate('/api/products')
     } else {
       showToast('Erro ao remover produto', 'error')
@@ -208,12 +209,38 @@ export default function AdminProdutos() {
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-1.5">Descrição *</label>
-              <textarea
-                className="input-cartoon h-28 resize-none"
-                placeholder="Descreva os detalhes do produto, o que está incluído, benefícios..."
-                value={form.description}
-                onChange={e => setForm({ ...form, description: e.target.value })}
-              />
+              <div className="relative">
+                <textarea
+                  className="input-cartoon h-28 resize-none"
+                  placeholder="Descreva os detalhes do produto, o que está incluído, benefícios..."
+                  value={form.description}
+                  onChange={e => setForm({ ...form, description: e.target.value })}
+                />
+                {form.name && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!form.name) return
+                      const token = localStorage.getItem('token')
+                      const res = await fetch('/api/ai/generate-description', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ productName: form.name }),
+                      })
+                      if (res.ok) {
+                        const data = await res.json()
+                        const title = data.text.match(/TÍTULO:\s*(.+)/)?.[1] || ''
+                        const desc = data.text.match(/DESCRIÇÃO:\s*(.+?)(?:\nPALAVRAS-CHAVE:|$)/s)?.[1]?.trim() || data.text
+                        if (title) setForm(prev => ({ ...prev, name: title, description: desc }))
+                        else setForm(prev => ({ ...prev, description: desc }))
+                      }
+                    }}
+                    className="absolute bottom-2 right-2 text-[10px] px-2 py-1 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors"
+                  >
+                    ✨ Gerar com IA
+                  </button>
+                )}
+              </div>
               <p className="text-xs text-gray-500 mt-1">{form.description.length} caracteres</p>
             </div>
           </div>
@@ -310,17 +337,40 @@ export default function AdminProdutos() {
                 Categoria *
                 <Link href="/admin/dashboard/categorias" className="text-green-neon hover:underline text-xs ml-2">(Gerenciar)</Link>
               </label>
-              <select className="input-cartoon" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-                {categories.length === 0 ? (
-                  <option value="">Nenhuma categoria. Crie uma em Categorias</option>
-                ) : (
-                  categories.filter(c => c.active).map(cat => (
-                    <option key={cat.id} value={cat.name}>
-                      {cat.icon} {cat.name}
-                    </option>
-                  ))
+              <div className="flex gap-2">
+                <select className="input-cartoon flex-1" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                  {categories.length === 0 ? (
+                    <option value="">Nenhuma categoria. Crie uma em Categorias</option>
+                  ) : (
+                    categories.filter(c => c.active).map(cat => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.icon} {cat.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                {form.name && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const token = localStorage.getItem('token')
+                      const res = await fetch('/api/ai/suggest-category', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ productName: form.name }),
+                      })
+                      if (res.ok) {
+                        const data = await res.json()
+                        const match = categories.find(c => c.name.toLowerCase().includes(data.category.toLowerCase()))
+                        if (match) setForm(prev => ({ ...prev, category: match.name }))
+                      }
+                    }}
+                    className="px-3 py-2 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors text-xs whitespace-nowrap"
+                  >
+                    ✨ Sugerir
+                  </button>
                 )}
-              </select>
+              </div>
               {categories.length === 0 && (
                 <p className="text-xs text-yellow-400 mt-1">⚠️ Crie uma categoria primeiro em <Link href="/admin/dashboard/categorias" className="underline">Categorias</Link></p>
               )}
@@ -425,9 +475,15 @@ export default function AdminProdutos() {
           <h2 className="title-cartoon text-3xl text-white mb-1">Produtos</h2>
           <p className="text-gray-400 text-sm">Gerencie seu catálogo de produtos</p>
         </div>
-        <button onClick={openCreate} className="btn-cartoon text-sm gap-2">
-          <HiPlus className="text-lg" /> Novo Produto
-        </button>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer select-none">
+            <input type="checkbox" checked={showInactive} onChange={() => setShowInactive(!showInactive)} className="accent-green-neon" />
+            Mostrar inativos
+          </label>
+          <button onClick={openCreate} className="btn-cartoon text-sm gap-2">
+            <HiPlus className="text-lg" /> Novo Produto
+          </button>
+        </div>
       </div>
 
       {showGuide && (
@@ -463,8 +519,8 @@ export default function AdminProdutos() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {products.map(product => (
-            <div key={product.id} className="card-cartoon flex items-center gap-4 p-4 animate-slide-up">
+          {products.filter(p => showInactive || p.active).map(product => (
+            <div key={product.id} className={`card-cartoon flex items-center gap-4 p-4 animate-slide-up ${!product.active ? 'opacity-50 border-red-500/30' : ''}`}>
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-dark-100 to-dark-950 flex-shrink-0">
                 {product.images?.length > 0 ? (
                   <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover" />
@@ -476,7 +532,10 @@ export default function AdminProdutos() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="font-medium text-white">{product.name}</h3>
+                  <h3 className={`font-medium ${!product.active ? 'text-red-400 line-through' : 'text-white'}`}>{product.name}</h3>
+                  {!product.active && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-red-500/10 text-red-400 border border-red-500/30">Inativo</span>
+                  )}
                   {product.images?.length > 1 && (
                     <span className="text-[10px] text-gray-500">+{product.images.length - 1} fotos</span>
                   )}

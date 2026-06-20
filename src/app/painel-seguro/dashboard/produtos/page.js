@@ -19,6 +19,7 @@ export default function AdminProdutos() {
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState(null)
   const [showGuide, setShowGuide] = useState(true)
+  const [showInactive, setShowInactive] = useState(true)
   const { toast, showToast, closeToast } = useToast()
 
   const categories = categoriesResult?.categories || []
@@ -77,7 +78,7 @@ export default function AdminProdutos() {
     })
 
     if (res.ok) {
-      showToast('Produto removido!', 'success')
+      showToast('Produto desativado!', 'success')
       mutate('/api/products')
     } else {
       showToast('Erro ao remover produto', 'error')
@@ -91,9 +92,15 @@ export default function AdminProdutos() {
           <h2 className="title-cartoon text-3xl text-white mb-1">Produtos</h2>
           <p className="text-gray-400 text-sm">Gerencie seu catálogo de produtos</p>
         </div>
-        <button onClick={openCreate} className="btn-cartoon text-sm gap-2">
-          <HiPlus className="text-lg" /> Novo Produto
-        </button>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer select-none">
+            <input type="checkbox" checked={showInactive} onChange={() => setShowInactive(!showInactive)} className="accent-green-neon" />
+            Mostrar inativos
+          </label>
+          <button onClick={openCreate} className="btn-cartoon text-sm gap-2">
+            <HiPlus className="text-lg" /> Novo Produto
+          </button>
+        </div>
       </div>
 
       {/* Guia Didática */}
@@ -153,14 +160,17 @@ export default function AdminProdutos() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {(products || []).map(product => (
-            <div key={product.id} className="card-cartoon flex items-center gap-4 p-4 animate-slide-up">
+          {(products || []).filter(p => showInactive || p.active).map(product => (
+            <div key={product.id} className={`card-cartoon flex items-center gap-4 p-4 animate-slide-up ${!product.active ? 'opacity-50 border-red-500/30' : ''}`}>
               <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-dark-100 to-dark-950 flex items-center justify-center text-2xl flex-shrink-0">
                 {product.category.split(' ')[0]}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <h3 className="font-medium text-white">{product.name}</h3>
+                  <h3 className={`font-medium ${!product.active ? 'text-red-400 line-through' : 'text-white'}`}>{product.name}</h3>
+                  {!product.active && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-red-500/10 text-red-400 border border-red-500/30">Inativo</span>
+                  )}
                   <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase ${
                     product.deliveryType === 'auto_v2'
                       ? 'bg-purple-500/10 text-purple-400 border border-purple-500/30'
