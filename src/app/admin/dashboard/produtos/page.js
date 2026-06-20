@@ -33,6 +33,7 @@ export default function AdminProdutos() {
   const [urlInput, setUrlInput] = useState('')
   const [pendingImages, setPendingImages] = useState([])
   const [cleaning, setCleaning] = useState(false)
+  const [confirming, setConfirming] = useState(false)
   const fileInputRef = useRef(null)
 
 
@@ -108,8 +109,8 @@ export default function AdminProdutos() {
     showToast('Imagem adicionada!', 'success')
   }
 
-  const handleSave = async (e) => {
-    e.preventDefault()
+  const handleSave = async () => {
+    setConfirming(false)
     const token = localStorage.getItem('token')
 
     let uploadedUrls = [...form.images]
@@ -620,7 +621,7 @@ export default function AdminProdutos() {
               ))}
             </div>
 
-            <form onSubmit={handleSave}>
+            <form onSubmit={e => e.preventDefault()} onKeyDown={e => e.key === 'Enter' && e.preventDefault()}>
               {renderStep()}
 
               <div className="flex gap-3 mt-8 pt-4 border-t border-dark-100">
@@ -638,8 +639,17 @@ export default function AdminProdutos() {
                   <button type="button" onClick={nextStep} disabled={!canNext()} className="btn-cartoon flex-1 text-sm gap-2 disabled:opacity-50">
                     Avançar <HiChevronRight />
                   </button>
+                ) : confirming ? (
+                  <>
+                    <button type="button" onClick={() => setConfirming(false)} className="btn-cartoon-outline flex-1 text-sm">
+                      Cancelar
+                    </button>
+                    <button type="button" onClick={handleSave} className="btn-cartoon flex-1 text-sm bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30">
+                      ✓ Confirmar
+                    </button>
+                  </>
                 ) : (
-                  <button type="submit" className="btn-cartoon flex-1 text-sm">
+                  <button type="button" onClick={() => setConfirming(true)} className="btn-cartoon flex-1 text-sm">
                     {editing ? 'Atualizar Produto' : 'Criar Produto'}
                   </button>
                 )}
