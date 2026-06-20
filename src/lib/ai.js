@@ -1,6 +1,6 @@
 const OPENROUTER_API = 'https://openrouter.ai/api/v1/chat/completions'
 
-const MODEL = 'mistralai/mistral-7b-instruct'
+const MODEL = 'mistralai/mistral-7b-instruct:free'
 
 export async function callAI(system, prompt) {
   if (!process.env.OPENROUTER_API_KEY) {
