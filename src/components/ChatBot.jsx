@@ -9,11 +9,21 @@ export default function ChatBot() {
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [products, setProducts] = useState([])
   const chatEnd = useRef(null)
 
   useEffect(() => {
     chatEnd.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    if (open && !products.length) {
+      fetch('/api/products?limit=100')
+        .then(r => r.json())
+        .then(d => setProducts(d.products || []))
+        .catch(() => {})
+    }
+  }, [open, products.length])
 
   const handleSend = async (e) => {
     e.preventDefault()
@@ -30,7 +40,14 @@ export default function ChatBot() {
       })
       if (res.ok) {
         const data = await res.json()
-        setMessages(prev => [...prev, { role: 'assistant', text: data.reply }])
+        const msgs = [{ role: 'assistant', text: data.reply }]
+        if (data.matchedIds?.length) {
+          const matched = products.filter(p => data.matchedIds.includes(p.id))
+          if (matched.length) {
+            msgs.push({ role: 'products', products: matched })
+          }
+        }
+        setMessages(prev => [...prev, ...msgs])
       } else {
         setMessages(prev => [...prev, { role: 'assistant', text: 'Desculpe, n\u00e3o consegui processar sua mensagem agora.' }])
       }
@@ -61,15 +78,35 @@ export default function ChatBot() {
 
           <div className="flex-1 h-80 overflow-y-auto p-4 space-y-3">
             {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-green-neon/20 text-white rounded-br-md'
-                    : 'bg-dark-100 text-gray-300 rounded-bl-md'
-                }`}>
-                  {msg.text}
+              msg.role === 'products' ? (
+                <div key={i} className="space-y-2">
+                  {msg.products.map(p => (
+                    <a key={p.id} href={`/produto/${p.id}`} className="flex items-center gap-2 p-2 rounded-xl bg-dark-100 hover:bg-dark-200 transition-colors group">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-dark-950 flex-shrink-0">
+                        {p.images?.[0]?.url ? (
+                          <img src={p.images[0].url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-sm">{p.category?.charAt(0) || '?'}</div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-white truncate group-hover:text-green-neon transition-colors">{p.name}</p>
+                        <p className="text-[10px] text-green-neon font-bold">R$ {Number(p.price).toFixed(2)}</p>
+                      </div>
+                    </a>
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-green-neon/20 text-white rounded-br-md'
+                      : 'bg-dark-100 text-gray-300 rounded-bl-md'
+                  }`}>
+                    {msg.text}
+                  </div>
+                </div>
+              )
             ))}
             {loading && (
               <div className="flex justify-start">
