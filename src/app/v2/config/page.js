@@ -100,10 +100,12 @@ export default function V2Config() {
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Multiplicador G1</label>
                 <input name="galeMultiplier1" defaultValue={config.galeMultiplier1} step="0.1" type="number" className="input-cartoon text-sm" />
+                <p className="text-[10px] text-gray-500 mt-0.5">Recomendado: 2x (entrada × 2)</p>
               </div>
               <div>
                 <label className="block text-xs text-gray-400 mb-1">Multiplicador G2</label>
                 <input name="galeMultiplier2" defaultValue={config.galeMultiplier2} step="0.1" type="number" className="input-cartoon text-sm" />
+                <p className="text-[10px] text-gray-500 mt-0.5">Recomendado: 4x (entrada × 4)</p>
               </div>
             </div>
           </div>

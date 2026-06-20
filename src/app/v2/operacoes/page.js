@@ -2,7 +2,7 @@
 
 import useSWR, { useSWRConfig } from 'swr'
 import { adminFetcher } from '@/lib/fetcher'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Toast, { useToast } from '@/components/Toast'
 import { HiTrash } from 'react-icons/hi'
 
@@ -43,13 +43,24 @@ export default function V2Operacoes() {
   const { data: config, mutate: mutateConfig } = useSWR('/api/admin/banca/config', adminFetcher)
   const { data: operacoes, mutate: mutateOps } = useSWR('/api/admin/banca/operacoes', adminFetcher)
   const ops = operacoes || []
+
+  const [entradaField, setEntradaField] = useState(0)
+  const [payoutField, setPayoutField] = useState(80)
+
+  useEffect(() => {
+    if (config) {
+      setEntradaField(config.valorEntrada)
+      setPayoutField(config.payout * 100)
+    }
+  }, [config])
+
   const hoje = new Date().toISOString().slice(0, 10)
   const hojeOps = ops.filter(o => o.dia === hoje)
 
   const galeCalc = useMemo(() => {
     if (!config) return null
-    return calcGaleEntries(config.valorEntrada, config.payout, config.galeMultiplier1, config.galeMultiplier2, config.maxGales)
-  }, [config])
+    return calcGaleEntries(entradaField, payoutField / 100, config.galeMultiplier1, config.galeMultiplier2, config.maxGales)
+  }, [config, entradaField, payoutField])
 
   const hojeLucro = hojeOps.reduce((s, o) => s + o.resultado, 0)
   const hojeWins = hojeOps.filter(o => o.tipo !== 'loss').length
@@ -79,7 +90,7 @@ export default function V2Operacoes() {
     const res = await fetch('/api/admin/banca/operacoes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-      body: JSON.stringify({ tipo, periodo }),
+      body: JSON.stringify({ tipo, periodo, entrada: entradaField, payout: payoutField / 100 }),
     })
     if (res.ok) {
       const nomes = { win_direct: 'Win Direto ✅', win_g1: 'Win G1 🟡', win_g2: 'Win G2 🟠', loss: 'Loss ❌' }
@@ -112,6 +123,18 @@ export default function V2Operacoes() {
           <select value={periodo} onChange={e => setPeriodo(e.target.value)} className="input-cartoon text-sm py-1.5 px-2 w-auto">
             {PERIODOS.map(p => <option key={p.key} value={p.key}>{p.label}</option>)}
           </select>
+        </div>
+      </div>
+
+      {/* Inputs de entrada e payout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="card-cartoon p-4">
+          <label className="block text-xs text-gray-400 mb-1">💵 Valor da Entrada (R$)</label>
+          <input type="number" step="0.01" value={entradaField} onChange={e => setEntradaField(parseFloat(e.target.value) || 0)} className="input-cartoon text-sm" />
+        </div>
+        <div className="card-cartoon p-4">
+          <label className="block text-xs text-gray-400 mb-1">📈 Payout (%)</label>
+          <input type="number" step="1" value={payoutField} onChange={e => setPayoutField(parseFloat(e.target.value) || 0)} className="input-cartoon text-sm" />
         </div>
       </div>
 
@@ -148,7 +171,8 @@ export default function V2Operacoes() {
             <span>Losses: <strong className="text-red-400">{hojeLosses}</strong></span>
             <span>Lucro: <strong className={hojeLucro >= 0 ? 'text-green-neon' : 'text-red-400'}>{formatMoney(hojeLucro)}</strong></span>
             {hojeTotal > 0 && <span>Taxa: <strong className="text-white">{((hojeWins / hojeTotal) * 100).toFixed(0)}%</strong></span>}
-            <span>Entrada: <strong className="text-white">{formatMoney(config.valorEntrada)}</strong></span>
+            <span>Entrada: <strong className="text-white">{formatMoney(entradaField)}</strong></span>
+            <span>Payout: <strong className="text-white">{payoutField}%</strong></span>
           </div>
         )}
       </div>
@@ -184,6 +208,7 @@ export default function V2Operacoes() {
                   <span>{op.tipo === 'win_direct' ? '✅' : op.tipo === 'win_g1' ? '🟡' : op.tipo === 'win_g2' ? '🟠' : '❌'}</span>
                   <span className="text-xs text-gray-500">{PERIODOS.find(p => p.key === op.periodo)?.label}</span>
                   <span className="text-xs text-gray-400">{new Date(op.createdAt).toLocaleTimeString()}</span>
+                  {op.payoutUsado > 0 && <span className="text-[10px] text-gray-500">{(op.payoutUsado * 100).toFixed(0)}%</span>}
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={op.resultado >= 0 ? 'text-green-neon' : 'text-red-400'}>

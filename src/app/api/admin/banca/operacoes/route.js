@@ -28,7 +28,8 @@ export async function POST(request) {
   const admin = getAdminFromRequest(request)
   if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-  const { tipo, periodo } = await request.json()
+  const body = await request.json()
+  const { tipo, periodo, payout: payoutBody, entrada: entradaBody } = body
   if (!tipo || !periodo) {
     return NextResponse.json({ error: 'tipo e periodo são obrigatórios' }, { status: 400 })
   }
@@ -45,8 +46,9 @@ export async function POST(request) {
     config = await prisma.bancaConfig.create({ data: {} })
   }
 
-  const entrada = config.valorEntrada
-  const payout = config.payout
+  // Usa valores enviados pelo usuário ou fallback da config
+  const entrada = entradaBody !== undefined ? Number(entradaBody) : config.valorEntrada
+  const payout = payoutBody !== undefined ? Number(payoutBody) : config.payout
   const g1 = config.galeMultiplier1
   const g2 = config.galeMultiplier2
   const gales = config.maxGales
@@ -73,7 +75,7 @@ export async function POST(request) {
 
   const [operacao] = await prisma.$transaction([
     prisma.bancaOperacao.create({
-      data: { dia, periodo, tipo, entrada, resultado, saldoPos: novaBanca },
+      data: { dia, periodo, tipo, entrada, payoutUsado: payout, resultado, saldoPos: novaBanca },
     }),
     prisma.bancaConfig.update({
       where: { id: config.id },

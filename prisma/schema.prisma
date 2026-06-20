@@ -206,8 +206,8 @@ model BancaConfig {
   metaDiaria  Float    @default(0)
   stopLoss    Float    @default(0)
   maxGales    Int      @default(2)
-  galeMultiplier1 Float @default(2.5)
-  galeMultiplier2 Float @default(6.0)
+  galeMultiplier1 Float @default(2.0)
+  galeMultiplier2 Float @default(4.0)
   metaManha   Float    @default(0)
   metaTarde   Float    @default(0)
   metaNoite   Float    @default(0)
@@ -221,6 +221,7 @@ model BancaOperacao {
   periodo     String   // manha, tarde, noite
   tipo        String   // win_direct, win_g1, win_g2, loss
   entrada     Float    // base entry value
+  payoutUsado Float    @default(0) // payout % usado nesta operacao (ex: 0.80)
   resultado   Float    // profit/loss in reais
   saldoPos    Float    // bankroll after operation
   createdAt   DateTime @default(now())
