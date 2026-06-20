@@ -550,7 +550,7 @@ export default function AdminProdutos() {
       ) : (
         <div className="grid gap-4">
           {products.map(product => (
-              <div key={product.id} className={`card-cartoon flex items-start md:items-center gap-4 p-4 animate-slide-up ${!product.category ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}>
+              <div key={product.id} className={`card-cartoon grid grid-cols-[4rem_1fr_auto_auto] items-center gap-3 p-4 animate-slide-up ${!product.category ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}>
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-dark-100 to-dark-950 flex-shrink-0">
                 {product.images?.length > 0 ? (
                   <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover" />
@@ -560,9 +560,9 @@ export default function AdminProdutos() {
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                  <h3 className="font-medium text-white truncate max-w-[200px] md:max-w-none">{product.name}</h3>
+                  <h3 className="font-medium text-white truncate">{product.name}</h3>
                   {product.images?.length > 1 && (
                     <span className="text-[10px] text-gray-500 flex-shrink-0">+{product.images.length - 1} fotos</span>
                   )}
@@ -576,7 +576,7 @@ export default function AdminProdutos() {
                 </div>
                 <p className="text-sm text-gray-400 truncate">{product.description}</p>
               </div>
-              <div className="text-right flex-shrink-0">
+              <div className="text-right flex-shrink-0 pl-2">
                 <p className="text-green-neon font-bold whitespace-nowrap">R$ {product.price.toFixed(2)}</p>
                 {product.category ? (
                   <p className="text-xs text-gray-500 truncate max-w-[120px]">{product.category}</p>
