@@ -36,7 +36,7 @@ export default function AdminProdutos() {
 
 
   const categories = categoriesResult?.categories || []
-  const defaultCategory = categories.length > 0 ? categories[0].name : '🎬 Netflix'
+  const defaultCategory = categories.length > 0 ? categories[0].name : ''
 
   const [form, setForm] = useState({
     name: '', description: '', price: '', category: defaultCategory, active: true, deliveryType: 'auto', images: [],
@@ -44,7 +44,7 @@ export default function AdminProdutos() {
 
   const openCreate = () => {
     setEditing(null)
-    setForm({ name: '', description: '', price: '', category: '🎬 Netflix', active: true, deliveryType: 'auto', images: [] })
+    setForm({ name: '', description: '', price: '', category: defaultCategory, active: true, deliveryType: 'auto', images: [] })
     setPendingImages([])
     setStep(1)
     setShowModal(true)

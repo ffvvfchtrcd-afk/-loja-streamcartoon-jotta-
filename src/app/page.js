@@ -45,7 +45,7 @@ function HomeContent() {
   const total = result?.total || 0
 
   const allCategories = products.length > 0
-    ? ['Todas', ...new Set(products.map(p => p.category))]
+    ? ['Todas', ...new Set(products.map(p => p.category).filter(Boolean))]
     : ['Todas']
 
   const filtered = selectedCategory === 'Todas'
