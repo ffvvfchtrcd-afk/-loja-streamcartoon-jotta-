@@ -163,7 +163,7 @@ export default function ProductPage() {
   }
 
   // Produtos relacionados (mesma categoria, excluindo o atual)
-  const getCat = (p) => p.category || ''
+  const getCat = (p) => (p && p.category) || ''
   const relatedProducts = allProducts?.products
     ?.filter(p => getCat(p) === getCat(product) && p.id !== Number(id))
     ?.slice(0, 3) || []

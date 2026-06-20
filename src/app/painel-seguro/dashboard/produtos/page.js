@@ -19,6 +19,7 @@ export default function AdminProdutos() {
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState(null)
   const [showGuide, setShowGuide] = useState(true)
+  const [confirming, setConfirming] = useState(false)
   const { toast, showToast, closeToast } = useToast()
 
   const categories = categoriesResult?.categories || []
@@ -47,8 +48,7 @@ export default function AdminProdutos() {
     setShowModal(true)
   }
 
-  const handleSave = async (e) => {
-    e.preventDefault()
+  const handleSave = async () => {
     const token = localStorage.getItem('token')
     const data = { ...form, price: parseFloat(form.price) }
     const url = editing ? `/api/products/${editing.id}` : '/api/products'
@@ -60,6 +60,7 @@ export default function AdminProdutos() {
       body: JSON.stringify(data),
     })
 
+    setConfirming(false)
     if (res.ok) {
       showToast(editing ? 'Produto atualizado!' : 'Produto criado!', 'success')
       setShowModal(false)
@@ -194,7 +195,7 @@ export default function AdminProdutos() {
             <h3 className="font-cartoon text-xl text-white mb-6">
               {editing ? 'Editar Produto' : 'Novo Produto'}
             </h3>
-            <form onSubmit={handleSave} className="space-y-4">
+            <form onSubmit={e => e.preventDefault()} onKeyDown={e => e.key === 'Enter' && e.preventDefault()} className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Nome</label>
                 <input className="input-cartoon" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
@@ -276,8 +277,17 @@ export default function AdminProdutos() {
                 <label htmlFor="active" className="text-sm text-gray-400">Produto ativo na loja</label>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowModal(false)} className="btn-cartoon-outline flex-1 text-sm">Cancelar</button>
-                <button type="submit" className="btn-cartoon flex-1 text-sm">Salvar</button>
+                {confirming ? (
+                  <>
+                    <button type="button" onClick={() => setConfirming(false)} className="btn-cartoon-outline flex-1 text-sm">Cancelar</button>
+                    <button type="button" onClick={handleSave} className="btn-cartoon flex-1 text-sm bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30">✓ Confirmar</button>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" onClick={() => setShowModal(false)} className="btn-cartoon-outline flex-1 text-sm">Cancelar</button>
+                    <button type="button" onClick={() => setConfirming(true)} className="btn-cartoon flex-1 text-sm">Salvar</button>
+                  </>
+                )}
               </div>
             </form>
           </div>
