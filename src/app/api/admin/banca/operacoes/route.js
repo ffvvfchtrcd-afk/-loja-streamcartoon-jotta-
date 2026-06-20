@@ -29,7 +29,7 @@ export async function POST(request) {
   if (!admin) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
   const body = await request.json()
-  const { tipo, periodo, payout: payoutBody, entrada: entradaBody } = body
+  const { tipo, periodo, resultado: resultadoBody, entrada: entradaBody } = body
   if (!tipo || !periodo) {
     return NextResponse.json({ error: 'tipo e periodo são obrigatórios' }, { status: 400 })
   }
@@ -48,30 +48,37 @@ export async function POST(request) {
 
   // Usa valores enviados pelo usuário ou fallback da config
   const entrada = entradaBody !== undefined ? Number(entradaBody) : config.valorEntrada
-  const payout = payoutBody !== undefined ? Number(payoutBody) : config.payout
-  const g1 = config.galeMultiplier1
-  const g2 = config.galeMultiplier2
-  const g3 = config.galeMultiplier3
-  const gales = config.maxGales
-  const g1Entry = entrada * g1
-  const g2Entry = entrada * g2
-  const g3Entry = entrada * g3
 
   let resultado = 0
 
-  if (tipo === 'win_direct') {
-    resultado = entrada * payout
-  } else if (tipo === 'win_g1') {
-    resultado = g1Entry * payout - entrada
-  } else if (tipo === 'win_g2') {
-    resultado = g2Entry * payout - entrada - g1Entry
-  } else if (tipo === 'win_g3') {
-    resultado = g3Entry * payout - entrada - g1Entry - g2Entry
-  } else if (tipo === 'loss') {
-    if (gales >= 3) resultado = -(entrada + g1Entry + g2Entry + g3Entry)
-    else if (gales >= 2) resultado = -(entrada + g1Entry + g2Entry)
-    else if (gales === 1) resultado = -(entrada + g1Entry)
-    else resultado = -entrada
+  // Se resultado foi enviado diretamente, usa ele
+  if (resultadoBody !== undefined) {
+    resultado = Number(resultadoBody)
+  } else {
+    // Fallback: calcula automaticamente
+    const payout = config.payout
+    const g1 = config.galeMultiplier1
+    const g2 = config.galeMultiplier2
+    const g3 = config.galeMultiplier3
+    const gales = config.maxGales
+    const g1Entry = entrada * g1
+    const g2Entry = entrada * g2
+    const g3Entry = entrada * g3
+
+    if (tipo === 'win_direct') {
+      resultado = entrada * payout
+    } else if (tipo === 'win_g1') {
+      resultado = g1Entry * payout - entrada
+    } else if (tipo === 'win_g2') {
+      resultado = g2Entry * payout - entrada - g1Entry
+    } else if (tipo === 'win_g3') {
+      resultado = g3Entry * payout - entrada - g1Entry - g2Entry
+    } else if (tipo === 'loss') {
+      if (gales >= 3) resultado = -(entrada + g1Entry + g2Entry + g3Entry)
+      else if (gales >= 2) resultado = -(entrada + g1Entry + g2Entry)
+      else if (gales === 1) resultado = -(entrada + g1Entry)
+      else resultado = -entrada
+    }
   }
 
   const novaBanca = Math.max(0, config.bancaAtual + resultado)
@@ -80,7 +87,11 @@ export async function POST(request) {
 
   const [operacao] = await prisma.$transaction([
     prisma.bancaOperacao.create({
-      data: { dia, periodo, tipo, entrada, payoutUsado: payout, resultado, saldoPos: novaBanca },
+      data: {
+        dia, periodo, tipo, entrada,
+        payoutUsado: resultadoBody !== undefined ? 0 : config.payout,
+        resultado, saldoPos: novaBanca
+      },
     }),
     prisma.bancaConfig.update({
       where: { id: config.id },

@@ -114,8 +114,6 @@ export default function V2Config() {
                 <p className="text-[10px] text-gray-500 mt-0.5">8x (entrada × 8)</p>
               </div>
             </div>
-              </div>
-            </div>
           </div>
 
           {/* Metas */}

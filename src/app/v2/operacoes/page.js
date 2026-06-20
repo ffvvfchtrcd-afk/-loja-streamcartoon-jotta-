@@ -2,7 +2,7 @@
 
 import useSWR, { useSWRConfig } from 'swr'
 import { adminFetcher } from '@/lib/fetcher'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import Toast, { useToast } from '@/components/Toast'
 import { HiTrash } from 'react-icons/hi'
 
@@ -10,26 +10,18 @@ function formatMoney(v) {
   return `R$ ${(v || 0).toFixed(2)}`
 }
 
-function calcGaleEntries(entrada, payout, g1, g2, g3, gales) {
-  const g1Entry = entrada * g1
-  const g2Entry = entrada * g2
-  const g3Entry = entrada * g3
-  const results = {}
-  results.win_direct = entrada * payout
-  results.win_g1 = g1Entry * payout - entrada
-  results.win_g2 = g2Entry * payout - entrada - g1Entry
-  results.win_g3 = g3Entry * payout - entrada - g1Entry - g2Entry
-  if (gales >= 3) results.loss = -(entrada + g1Entry + g2Entry + g3Entry)
-  else if (gales >= 2) results.loss = -(entrada + g1Entry + g2Entry)
-  else if (gales === 1) results.loss = -(entrada + g1Entry)
-  else results.loss = -entrada
-  return results
-}
-
 const PERIODOS = [
   { key: 'manha', label: '🌅 Manhã' },
   { key: 'tarde', label: '☀️ Tarde' },
   { key: 'noite', label: '🌙 Noite' },
+]
+
+const botoes = [
+  { tipo: 'win_direct', label: 'Win Direto', icon: '✅', cor: 'green', corClasse: 'bg-green-500/10 text-green-400 border-green-500/30 hover:bg-green-500/20' },
+  { tipo: 'win_g1', label: 'Win G1', icon: '🟡', cor: 'yellow', corClasse: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20' },
+  { tipo: 'win_g2', label: 'Win G2', icon: '🟠', cor: 'orange', corClasse: 'bg-orange-500/10 text-orange-400 border-orange-500/30 hover:bg-orange-500/20' },
+  { tipo: 'win_g3', label: 'Win G3', icon: '🟣', cor: 'purple', corClasse: 'bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20' },
+  { tipo: 'loss', label: 'Loss', icon: '❌', cor: 'red', corClasse: 'bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20' },
 ]
 
 export default function V2Operacoes() {
@@ -43,27 +35,14 @@ export default function V2Operacoes() {
     return 'noite'
   })
 
+  const [activeOp, setActiveOp] = useState(null)
+  const [amountField, setAmountField] = useState('')
+
   const { data: config, mutate: mutateConfig } = useSWR('/api/admin/banca/config', adminFetcher)
   const { data: operacoes, mutate: mutateOps } = useSWR('/api/admin/banca/operacoes', adminFetcher)
   const ops = operacoes || []
-
-  const [entradaField, setEntradaField] = useState(0)
-  const [payoutField, setPayoutField] = useState(80)
-
-  useEffect(() => {
-    if (config) {
-      setEntradaField(config.valorEntrada)
-      setPayoutField(config.payout * 100)
-    }
-  }, [config])
-
   const hoje = new Date().toISOString().slice(0, 10)
   const hojeOps = ops.filter(o => o.dia === hoje)
-
-  const galeCalc = useMemo(() => {
-    if (!config) return null
-    return calcGaleEntries(entradaField, payoutField / 100, config.galeMultiplier1, config.galeMultiplier2, config.galeMultiplier3, config.maxGales)
-  }, [config, entradaField, payoutField])
 
   const hojeLucro = hojeOps.reduce((s, o) => s + o.resultado, 0)
   const hojeWins = hojeOps.filter(o => o.tipo !== 'loss').length
@@ -83,22 +62,47 @@ export default function V2Operacoes() {
     })
   }, [config, hojeOps])
 
-  const handleOperacao = async (tipo) => {
+  const abrirConfirmacao = (tipo) => {
     if (metaAtingida && tipo !== 'loss') {
-      if (!confirm('🎉 Meta do dia já foi atingida! Deseja continuar operando?')) return
+      if (!confirm('🎉 Meta do dia já foi atingida! Deseja continuar?')) return
     }
     if (stopAtingido) {
-      if (!confirm('⚠️ Stop Loss atingido! Deseja continuar operando?')) return
+      if (!confirm('⚠️ Stop Loss atingido! Deseja continuar?')) return
     }
+    const entrada = config?.valorEntrada || 0
+    setActiveOp(tipo)
+    if (tipo === 'loss') {
+      setAmountField(entrada.toString())
+    } else {
+      setAmountField((entrada * 1.5).toFixed(2))
+    }
+  }
+
+  const confirmarOperacao = async () => {
+    const entrada = config?.valorEntrada || 0
+    const valor = parseFloat(amountField) || 0
+    const isLoss = activeOp === 'loss'
+
+    let resultado
+    if (isLoss) {
+      resultado = -Math.abs(valor)
+    } else {
+      resultado = valor - entrada
+    }
+
     const res = await fetch('/api/admin/banca/operacoes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-      body: JSON.stringify({ tipo, periodo, entrada: entradaField, payout: payoutField / 100 }),
+      body: JSON.stringify({ tipo: activeOp, periodo, entrada, resultado }),
     })
+
     if (res.ok) {
-      const nomes = { win_direct: 'Win Direto ✅', win_g1: 'Win G1 🟡', win_g2: 'Win G2 🟠', win_g3: 'Win G3 🟣', loss: 'Loss ❌' }
-      showToast(`${nomes[tipo]} registrado!`, 'success')
-      mutateConfig(); mutateOps()
+      const bt = botoes.find(b => b.tipo === activeOp)
+      showToast(`${bt?.icon} ${bt?.label} registrado!`, 'success')
+      setActiveOp(null)
+      setAmountField('')
+      mutateConfig()
+      mutateOps()
     } else {
       showToast('Erro ao registrar operação', 'error')
     }
@@ -113,6 +117,12 @@ export default function V2Operacoes() {
     if (res.ok) { showToast('Operação desfeita', 'success'); mutateConfig(); mutateOps() }
     else { showToast('Erro ao desfazer', 'error') }
   }
+
+  const entradaAtual = config?.valorEntrada || 0
+  const isLoss = activeOp === 'loss'
+  const valorRecebido = parseFloat(amountField) || 0
+  const resultadoPreview = isLoss ? -Math.abs(valorRecebido) : valorRecebido - entradaAtual
+  const btAtivo = botoes.find(b => b.tipo === activeOp)
 
   return (
     <div className="space-y-6">
@@ -129,61 +139,93 @@ export default function V2Operacoes() {
         </div>
       </div>
 
-      {/* Inputs de entrada e payout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="card-cartoon p-4">
-          <label className="block text-xs text-gray-400 mb-1">💵 Valor da Entrada (R$)</label>
-          <input type="number" step="0.01" value={entradaField} onChange={e => setEntradaField(parseFloat(e.target.value) || 0)} className="input-cartoon text-sm" />
-        </div>
-        <div className="card-cartoon p-4">
-          <label className="block text-xs text-gray-400 mb-1">📈 Payout (%)</label>
-          <input type="number" step="1" value={payoutField} onChange={e => setPayoutField(parseFloat(e.target.value) || 0)} className="input-cartoon text-sm" />
-        </div>
+      {/* Entrada atual */}
+      <div className="card-cartoon p-4 text-center">
+        <p className="text-xs text-gray-400 mb-1">💵 Entrada atual</p>
+        <p className="text-2xl font-cartoon text-white">{formatMoney(entradaAtual)}</p>
       </div>
 
       {/* Botões */}
       <div className="card-cartoon p-6">
-        <h3 className="text-white font-medium mb-4">Registrar Operação</h3>
+        <h3 className="text-white font-medium mb-4">Clique no resultado da operação</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <button onClick={() => handleOperacao('win_direct')}
-            className="btn-cartoon bg-green-500/10 text-green-400 border-green-500/30 hover:bg-green-500/20 text-sm py-5">
-            ✅ Win Direto
-            {galeCalc && <span className="block text-[10px] opacity-70 font-normal mt-0.5">{formatMoney(galeCalc.win_direct)}</span>}
-          </button>
-          <button onClick={() => handleOperacao('win_g1')}
-            className="btn-cartoon bg-yellow-500/10 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20 text-sm py-5">
-            🟡 Win G1
-            {galeCalc && <span className="block text-[10px] opacity-70 font-normal mt-0.5">{formatMoney(galeCalc.win_g1)}</span>}
-          </button>
-          <button onClick={() => handleOperacao('win_g2')}
-            className="btn-cartoon bg-orange-500/10 text-orange-400 border-orange-500/30 hover:bg-orange-500/20 text-sm py-5">
-            🟠 Win G2
-            {galeCalc && <span className="block text-[10px] opacity-70 font-normal mt-0.5">{formatMoney(galeCalc.win_g2)}</span>}
-          </button>
-          <button onClick={() => handleOperacao('win_g3')}
-            className="btn-cartoon bg-purple-500/10 text-purple-400 border-purple-500/30 hover:bg-purple-500/20 text-sm py-5">
-            🟣 Win G3
-            {galeCalc && <span className="block text-[10px] opacity-70 font-normal mt-0.5">{formatMoney(galeCalc.win_g3)}</span>}
-          </button>
-          <button onClick={() => handleOperacao('loss')}
-            className="btn-cartoon bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20 text-sm py-5">
-            ❌ Loss
-            {galeCalc && <span className="block text-[10px] opacity-70 font-normal mt-0.5">{formatMoney(galeCalc.loss)}</span>}
-          </button>
+          {botoes.map(bt => (
+            <button
+              key={bt.tipo}
+              onClick={() => abrirConfirmacao(bt.tipo)}
+              disabled={activeOp !== null && activeOp !== bt.tipo}
+              className={`${bt.corClasse} btn-cartoon text-sm py-5 disabled:opacity-30 disabled:cursor-not-allowed transition-all ${activeOp === bt.tipo ? 'ring-2 ring-white/30 scale-[1.02]' : ''}`}
+            >
+              {bt.icon} {bt.label}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {config && (
-          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-gray-400">
+      {/* Confirmação inline */}
+      {activeOp && (
+        <div className="card-cartoon p-5 border-2 border-white/10 animate-slide-up">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl">{btAtivo?.icon}</span>
+            <span className="text-white font-medium">{btAtivo?.label}</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">
+                {isLoss ? '💰 Valor perdido (R$)' : '💰 Valor recebido (R$)'}
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={amountField}
+                onChange={e => setAmountField(e.target.value)}
+                className="input-cartoon text-lg font-bold text-center"
+                autoFocus
+              />
+            </div>
+            <div className="flex flex-col justify-center">
+              <p className="text-xs text-gray-400">
+                Entrada: <span className="text-white">{formatMoney(entradaAtual)}</span>
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Resultado:{' '}
+                <span className={resultadoPreview >= 0 ? 'text-green-neon font-bold' : 'text-red-400 font-bold'}>
+                  {resultadoPreview >= 0 ? '+' : ''}{formatMoney(resultadoPreview)}
+                </span>
+              </p>
+              {!isLoss && (
+                <p className="text-[10px] text-gray-500 mt-1">
+                  Lucro = Valor recebido - Entrada
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button onClick={() => { setActiveOp(null); setAmountField('') }} className="btn-cartoon-outline flex-1 text-sm">
+              Cancelar
+            </button>
+            <button onClick={confirmarOperacao} disabled={!amountField || parseFloat(amountField) <= 0}
+              className={`btn-cartoon flex-1 text-sm disabled:opacity-50 ${isLoss ? 'bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30' : 'bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30'}`}>
+              Confirmar {btAtivo?.icon}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Resumo do dia */}
+      {config && (
+        <div className="card-cartoon p-4">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-gray-400">
             <span>Operações hoje: <strong className="text-white">{hojeTotal}</strong></span>
             <span>Wins: <strong className="text-green-neon">{hojeWins}</strong></span>
             <span>Losses: <strong className="text-red-400">{hojeLosses}</strong></span>
             <span>Lucro: <strong className={hojeLucro >= 0 ? 'text-green-neon' : 'text-red-400'}>{formatMoney(hojeLucro)}</strong></span>
             {hojeTotal > 0 && <span>Taxa: <strong className="text-white">{((hojeWins / hojeTotal) * 100).toFixed(0)}%</strong></span>}
-            <span>Entrada: <strong className="text-white">{formatMoney(entradaField)}</strong></span>
-            <span>Payout: <strong className="text-white">{payoutField}%</strong></span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Períodos do dia */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -216,7 +258,7 @@ export default function V2Operacoes() {
                   <span>{op.tipo === 'win_direct' ? '✅' : op.tipo === 'win_g1' ? '🟡' : op.tipo === 'win_g2' ? '🟠' : op.tipo === 'win_g3' ? '🟣' : '❌'}</span>
                   <span className="text-xs text-gray-500">{PERIODOS.find(p => p.key === op.periodo)?.label}</span>
                   <span className="text-xs text-gray-400">{new Date(op.createdAt).toLocaleTimeString()}</span>
-                  {op.payoutUsado > 0 && <span className="text-[10px] text-gray-500">{(op.payoutUsado * 100).toFixed(0)}%</span>}
+                  <span className="text-[10px] text-gray-500">Ent: {formatMoney(op.entrada)}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={op.resultado >= 0 ? 'text-green-neon' : 'text-red-400'}>
