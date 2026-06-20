@@ -3,6 +3,10 @@ const OPENROUTER_API = 'https://openrouter.ai/api/v1/chat/completions'
 const MODEL = 'mistralai/mistral-7b-instruct'
 
 export async function callAI(system, prompt) {
+  if (!process.env.OPENROUTER_API_KEY) {
+    return 'Função indisponível. Configure OPENROUTER_API_KEY no .env para usar IA.'
+  }
+
   const res = await fetch(OPENROUTER_API, {
     method: 'POST',
     headers: {
