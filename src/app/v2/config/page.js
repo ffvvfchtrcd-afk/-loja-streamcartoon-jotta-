@@ -5,6 +5,10 @@ import { adminFetcher } from '@/lib/fetcher'
 import { useState } from 'react'
 import Toast, { useToast } from '@/components/Toast'
 
+function formatMoney(v) {
+  return `R$ ${(v || 0).toFixed(2)}`
+}
+
 const PERIODOS = [
   { key: 'manha', label: '🌅 Manhã' },
   { key: 'tarde', label: '☀️ Tarde' },
@@ -17,6 +21,7 @@ export default function V2Config() {
   const { data: config, mutate: mutateConfig } = useSWR('/api/admin/banca/config', adminFetcher)
   const { data: allOps } = useSWR('/api/admin/banca/operacoes', adminFetcher)
   const [resetting, setResetting] = useState(false)
+  const bancaAtual = config?.bancaAtual || 0
 
   const handleSave = async (e) => {
     e.preventDefault()
@@ -63,6 +68,15 @@ export default function V2Config() {
         <h2 className="title-cartoon text-3xl text-white mb-1">⚙️ Configurações</h2>
         <p className="text-gray-400 text-sm">Configure sua banca e estratégia</p>
       </div>
+
+      {config && (
+        <div className="card-cartoon p-4 text-center bg-dark-950/80">
+          <p className="text-xs text-gray-400 mb-0.5">💰 Saldo atual</p>
+          <p className={`text-2xl font-cartoon ${bancaAtual >= 0 ? 'text-green-neon' : 'text-red-400'}`}>
+            {formatMoney(bancaAtual)}
+          </p>
+        </div>
+      )}
 
       {config && (
         <form onSubmit={handleSave} className="space-y-4">
