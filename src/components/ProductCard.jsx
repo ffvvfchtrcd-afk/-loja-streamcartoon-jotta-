@@ -24,8 +24,8 @@ export default function ProductCard({ product }) {
   const { addItem, getItemQuantity } = useCart()
 
   useEffect(() => {
-    if (wishlistData?.wishlisted) {
-      setWishlisted(wishlistData.wishlisted.some(item => item.productId === product.id))
+    if (wishlistData?.items) {
+      setWishlisted(wishlistData.items.some(item => item.productId === product.id))
     }
   }, [wishlistData, product.id])
 

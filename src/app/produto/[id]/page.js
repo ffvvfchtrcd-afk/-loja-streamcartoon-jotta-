@@ -99,6 +99,9 @@ export default function ProductPage() {
         mutate(`/api/products/${id}`)
         setReviewComment('')
         setReviewRating(5)
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        if (errData.error) alert(errData.error)
       }
     } catch {}
     setSubmittingReview(false)
