@@ -514,7 +514,7 @@ export default function AdminProdutos() {
       ) : (
         <div className="grid gap-4">
           {products.map(product => (
-            <div key={product.id} className="card-cartoon flex items-center gap-4 p-4 animate-slide-up">
+              <div key={product.id} className={`card-cartoon flex items-center gap-4 p-4 animate-slide-up ${!product.category ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}>
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-dark-100 to-dark-950 flex-shrink-0">
                 {product.images?.length > 0 ? (
                   <img src={product.images[0].url} alt={product.name} className="w-full h-full object-cover" />
@@ -542,7 +542,11 @@ export default function AdminProdutos() {
               </div>
               <div className="text-right">
                 <p className="text-green-neon font-bold">R$ {product.price.toFixed(2)}</p>
-                <p className="text-xs text-gray-500">{product.category}</p>
+                {product.category ? (
+                  <p className="text-xs text-gray-500">{product.category}</p>
+                ) : (
+                  <p className="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded inline-block">⚠️ SEM CATEGORIA</p>
+                )}
               </div>
               <div className="flex gap-2">
                 <button onClick={() => openEdit(product)} className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors">

@@ -20,7 +20,7 @@ export async function GET(request) {
   const limit = parseInt(searchParams.get('limit') || '50')
   const skip = (page - 1) * limit
 
-  const where = admin ? {} : { active: true }
+  const where = admin ? {} : { active: true, category: { not: '' } }
 
   if (q) {
     where.OR = [
