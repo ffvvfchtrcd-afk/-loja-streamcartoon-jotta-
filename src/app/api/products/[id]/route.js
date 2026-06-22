@@ -46,7 +46,6 @@ export async function DELETE(request, { params }) {
     prisma.wishlistItem.deleteMany({ where: { productId: id } }),
     prisma.productImage.deleteMany({ where: { productId: id } }),
     prisma.orderItem.deleteMany({ where: { productId: id } }),
-    prisma.order.updateMany({ where: { productId: id }, data: { productId: null } }),
     prisma.product.delete({ where: { id } }),
   ])
 
@@ -67,6 +66,7 @@ export async function GET(request, { params }) {
     },
   })
   if (!product) return NextResponse.json({ error: 'Produto não encontrado' }, { status: 404 })
+  if (!product.active) return NextResponse.json({ error: 'Produto não encontrado' }, { status: 404 })
   if (product.deliveryType === 'auto') {
     const codes = await prisma.code.findMany({ where: { productId: id, used: false } })
     product.stock = codes.length

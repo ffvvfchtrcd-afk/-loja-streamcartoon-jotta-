@@ -1,21 +1,25 @@
 import jwt from 'jsonwebtoken'
 
-const SECRET = process.env.JWT_SECRET || 'streamcartoon-secret-key-change-in-production'
+const SECRET = process.env.JWT_SECRET
+if (!SECRET) {
+  console.error('⚠️  JWT_SECRET não definido! Gere um secret forte e adicione ao .env')
+}
+const SECRET_FALLBACK = SECRET || 'INSECURE-DEV-ONLY-CHANGE-IN-PRODUCTION'
 
 export function generateToken(admin) {
-  return jwt.sign({ id: admin.id, username: admin.username, role: admin.role }, SECRET, { expiresIn: '7d' })
+  return jwt.sign({ id: admin.id, username: admin.username, role: admin.role }, SECRET_FALLBACK, { expiresIn: '7d' })
 }
 
 export function verifyToken(token) {
   try {
-    return jwt.verify(token, SECRET)
+    return jwt.verify(token, SECRET_FALLBACK)
   } catch {
     return null
   }
 }
 
 export function generateUserToken(user) {
-  return jwt.sign({ id: user.id, username: user.username, type: 'user' }, SECRET, { expiresIn: '30d' })
+  return jwt.sign({ id: user.id, username: user.username, type: 'user' }, SECRET_FALLBACK, { expiresIn: '30d' })
 }
 
 export function getAdminFromRequest(request) {

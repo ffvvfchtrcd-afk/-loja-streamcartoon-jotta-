@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
-import { fetcher } from '@/lib/fetcher'
+import { userFetcher } from '@/lib/fetcher'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { HiArrowLeft, HiClock, HiCheckCircle, HiXCircle, HiClipboardCopy, HiCheck, HiTicket } from 'react-icons/hi'
@@ -17,7 +17,7 @@ export default function PedidoPage() {
   const params = useParams()
   const { data: order, error, isLoading } = useSWR(
     params.id ? `/api/orders/${params.id}` : null,
-    fetcher
+    userFetcher
   )
   const [copied, setCopied] = useState(false)
   const [copiedPix, setCopiedPix] = useState(false)

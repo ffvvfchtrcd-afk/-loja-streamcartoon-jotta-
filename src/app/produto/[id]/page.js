@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { HiHeart, HiOutlineHeart, HiShoppingCart, HiArrowLeft, HiClock, HiShieldCheck, HiLightningBolt, HiStar, HiTag, HiCheck, HiInformationCircle } from 'react-icons/hi'
 import ProductCard from '@/components/ProductCard'
+import { useCart } from '@/context/CartContext'
 
 function StarRating({ rating, size = 'md', interactive = false, onChange }) {
   const [hovered, setHovered] = useState(0)
@@ -169,6 +170,8 @@ export default function ProductPage() {
     ?.slice(0, 3) || []
 
   const [selectedImage, setSelectedImage] = useState(0)
+  const { addItem, totalItems } = useCart()
+  const [addedToCart, setAddedToCart] = useState(false)
 
   if (isLoading) {
     return (
@@ -367,12 +370,26 @@ export default function ProductPage() {
             </div>
 
             {/* CTA */}
-            <Link
-              href={`/checkout?productId=${id}`}
-              className={`btn-cartoon gap-2 inline-flex w-full sm:w-auto justify-center text-lg !py-4 ${outOfStock ? 'opacity-50 pointer-events-none' : ''}`}
-            >
-              <HiShoppingCart className="text-xl" /> {outOfStock ? 'Indisponível' : 'Comprar Agora'}
-            </Link>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  addItem(Number(id))
+                  setAddedToCart(true)
+                  setTimeout(() => setAddedToCart(false), 2000)
+                }}
+                disabled={outOfStock}
+                className={`btn-cartoon-outline gap-2 flex-1 sm:flex-none justify-center text-base !py-3 ${outOfStock ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <HiShoppingCart className="text-lg" />
+                {addedToCart ? '✓ Adicionado!' : 'Adicionar ao Carrinho'}
+              </button>
+              <Link
+                href={`/checkout?productId=${id}`}
+                className={`btn-cartoon gap-2 flex-1 sm:flex-none justify-center text-base !py-3 ${outOfStock ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                Comprar Agora
+              </Link>
+            </div>
           </div>
         </div>
 

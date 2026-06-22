@@ -355,7 +355,7 @@ function HomeContent() {
           </div>
           <div className="border-t border-green-neon/10 pt-4 text-center">
             <p className="text-gray-500 text-xs">
-              © 2024 <span className="text-green-neon font-cartoon">GreenHub</span>. Todos os direitos reservados.
+              © {new Date().getFullYear()} <span className="text-green-neon font-cartoon">GreenHub</span>. Todos os direitos reservados.
             </p>
           </div>
         </div>

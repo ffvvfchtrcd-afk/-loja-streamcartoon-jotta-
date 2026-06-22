@@ -1,12 +1,33 @@
 ﻿import { NextResponse } from 'next/server'
+import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 
+function verifyWebhookSignature(request, body) {
+  const secret = process.env.MERCADO_PAGO_WEBHOOK_SECRET
+  if (!secret) return true
+
+  const signature = request.headers.get('x-signature')
+  if (!signature) return false
+
+  const ts = signature.split(',').find(s => s.startsWith('ts=')?.split('=')[1])
+  const v1 = signature.split(',').find(s => s.startsWith('v1=')?.split('=')[1])
+  if (!ts || !v1) return false
+
+  const signedPayload = `${ts}.${JSON.stringify(body)}`
+  const expected = crypto.createHmac('sha256', secret).update(signedPayload).digest('hex')
+  return crypto.timingSafeEqual(Buffer.from(v1), Buffer.from(expected))
+}
 
 export async function POST(request) {
   try {
     const body = await request.json()
+
+    if (!verifyWebhookSignature(request, body)) {
+      console.warn('Webhook signature verification failed')
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    }
 
     // Mercado Pago IPN format
     const paymentId = body.data?.id || body.id
